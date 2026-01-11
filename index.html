@@ -1418,8 +1418,15 @@
         };
 
         // Load saved checklist state
-        const savedChecks = JSON.parse(localStorage.getItem('evg-checks') || '{}');
-        DATA.checklist.forEach(item => item.checked = savedChecks[item.id] || false);
+        try {
+            const savedChecks = JSON.parse(localStorage.getItem('evg-checks') || '{}');
+            if (DATA.checklist) {
+                DATA.checklist.forEach(item => item.checked = savedChecks[item.id] || false);
+            }
+        } catch (err) {
+            console.error("LocalStorage Error:", err);
+            // safe fallback
+        }
 
         // ============================================
         // 🔥 EMBERS ANIMATION
