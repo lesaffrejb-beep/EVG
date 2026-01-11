@@ -11,16 +11,19 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #09090b;
+            --bg: #000000;
             --bg-card: #18181b;
             --bg-elevated: #27272a;
-            --border: rgba(255, 255, 255, 0.08);
-            --border-hover: rgba(255, 255, 255, 0.15);
+            --border: rgba(255, 255, 255, 0.1);
+            --border-hover: rgba(255, 255, 255, 0.2);
+            --border-glow: rgba(245, 158, 11, 0.3);
             --glow: #f59e0b;
             --glow-dim: rgba(245, 158, 11, 0.12);
             --glow-bright: #fbbf24;
+            --glow-neon: #ff9500;
             --text: #fafafa;
             --text-secondary: #a1a1aa;
             --text-muted: #71717a;
@@ -37,7 +40,7 @@
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: var(--bg);
+            background: #000;
             color: var(--text);
             min-height: 100vh;
             min-height: 100dvh;
@@ -45,16 +48,18 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* Subtle animated gradient */
+        /* Rich Radial Gradient Background */
         .bg-glow {
             position: fixed;
             top: -50%;
             left: -50%;
             width: 200%;
             height: 200%;
-            background: radial-gradient(circle at 30% 20%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
-                radial-gradient(circle at 70% 80%, rgba(234, 88, 12, 0.04) 0%, transparent 50%);
-            animation: bgFloat 25s ease-in-out infinite;
+            background:
+                radial-gradient(circle at 20% 10%, rgba(245, 158, 11, 0.15) 0%, transparent 40%),
+                radial-gradient(circle at 80% 90%, rgba(234, 88, 12, 0.12) 0%, transparent 50%),
+                radial-gradient(circle at 50% 50%, rgba(170, 30, 30, 0.08) 0%, transparent 60%);
+            animation: bgFloat 30s ease-in-out infinite;
             pointer-events: none;
             z-index: 0;
         }
@@ -63,11 +68,11 @@
 
             0%,
             100% {
-                transform: translate(0, 0);
+                transform: translate(0, 0) scale(1);
             }
 
             50% {
-                transform: translate(-3%, 3%);
+                transform: translate(-3%, 3%) scale(1.05);
             }
         }
 
@@ -103,22 +108,25 @@
             }
         }
 
-        /* Bento Card */
+        /* Bento Card with Inner Glow */
         .card {
             background: var(--bg-card);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            transition: all 0.2s ease;
+            transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
         }
 
         .card:hover,
         .card:active {
             border-color: var(--border-hover);
             background: var(--bg-elevated);
+            transform: translateY(-1px);
         }
 
         .card-glow:hover {
-            box-shadow: 0 0 24px var(--glow-dim);
+            box-shadow: 0 0 32px var(--glow-dim), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            border-color: var(--border-glow);
         }
 
         /* App container */
@@ -319,12 +327,12 @@
             border-color: var(--success);
         }
 
-        /* Button Primary */
+        /* Button Primary with Tactile Feedback */
         .btn {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, var(--glow), #ea580c);
+            background: linear-gradient(135deg, var(--glow-neon), #ea580c);
             color: #000;
             font-size: 13px;
             font-weight: 600;
@@ -332,14 +340,18 @@
             border-radius: 10px;
             border: none;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             min-height: 44px;
         }
 
         .btn:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 8px 24px var(--glow-dim);
+            transform: translateY(-2px);
+            box-shadow: 0 12px 32px var(--glow-dim);
+        }
+
+        .btn:active {
+            transform: scale(0.95);
         }
 
         /* Timeline */
@@ -360,6 +372,7 @@
 
         .timeline-event {
             padding: 14px 16px;
+            padding-left: 20px;
             margin-bottom: 8px;
             cursor: pointer;
             position: relative;
@@ -369,6 +382,7 @@
         .timeline-event.highlight {
             border-color: var(--glow);
             background: linear-gradient(135deg, var(--glow-dim), transparent);
+            padding-left: 24px;
         }
 
         .timeline-event.highlight::before {
@@ -376,10 +390,10 @@
             position: absolute;
             top: 0;
             left: 0;
-            width: 3px;
+            width: 4px;
             height: 100%;
-            background: var(--glow);
-            border-radius: 3px 0 0 3px;
+            background: linear-gradient(180deg, var(--glow-neon), var(--glow));
+            border-radius: 4px 0 0 4px;
         }
 
         .timeline-event.has-modal::after {
@@ -408,12 +422,15 @@
 
         .timeline-time {
             font-size: 11px;
-            font-family: 'SF Mono', monospace;
-            color: var(--glow);
-            background: var(--glow-dim);
-            padding: 3px 8px;
-            border-radius: 6px;
+            font-family: 'SF Mono', 'Menlo', monospace;
+            font-weight: 700;
+            color: var(--glow-neon);
+            background: linear-gradient(135deg, var(--glow-dim), rgba(234, 88, 12, 0.15));
+            padding: 4px 10px;
+            border-radius: 8px;
             flex-shrink: 0;
+            border: 1px solid var(--border-glow);
+            box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
         }
 
         .timeline-desc {
@@ -613,96 +630,96 @@
             margin-top: 2px;
         }
 
-        /* Games with Score Counter */
-        .game-card {
+        /* Activity Accordion */
+        .activity-card {
             padding: 16px;
-            margin-bottom: 10px;
+            margin-bottom: 12px;
+            cursor: pointer;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
-        .game-header {
+        .activity-card:hover {
+            border-color: var(--border-glow);
+        }
+
+        .activity-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
+        .activity-header-left {
             display: flex;
             align-items: center;
             gap: 10px;
-            margin-bottom: 10px;
+            flex: 1;
         }
 
-        .game-icon {
+        .activity-icon {
             font-size: 24px;
         }
 
-        .game-title {
-            font-size: 14px;
+        .activity-title {
+            font-size: 15px;
             font-weight: 700;
         }
 
-        .game-rules {
-            font-size: 12px;
-            color: var(--text-secondary);
-            line-height: 1.5;
-            margin-bottom: 12px;
-        }
-
-        .game-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .game-points {
+        .activity-toggle {
             font-size: 11px;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .activity-card.expanded .activity-toggle {
+            color: var(--glow);
+        }
+
+        .activity-rules {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            opacity: 0;
+        }
+
+        .activity-card.expanded .activity-rules {
+            max-height: 400px;
+            opacity: 1;
+            margin-top: 14px;
+        }
+
+        .activity-rules ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        .activity-rules li {
+            padding: 8px 12px;
+            margin-bottom: 6px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 8px;
+            font-size: 13px;
+            line-height: 1.6;
+            color: var(--text-secondary);
+            border-left: 2px solid var(--border);
+        }
+
+        .activity-rules li::before {
+            content: '▶';
+            margin-right: 8px;
+            color: var(--glow);
+            font-size: 9px;
+        }
+
+        .activity-points {
+            font-size: 11px;
+            font-weight: 600;
             color: var(--glow);
             background: var(--glow-dim);
             padding: 5px 10px;
             border-radius: 6px;
-        }
-
-        .score-counter {
-            display: flex;
-            gap: 4px;
-        }
-
-        .score-team {
-            display: flex;
-            align-items: center;
-            gap: 4px;
-            background: var(--bg-elevated);
-            border-radius: 8px;
-            padding: 4px;
-        }
-
-        .score-team-label {
-            font-size: 10px;
-            color: var(--text-muted);
-            padding: 0 6px;
-        }
-
-        .score-btn {
-            width: 28px;
-            height: 28px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: var(--bg-card);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            color: var(--text);
-            font-size: 14px;
-            cursor: pointer;
-            transition: all 0.15s;
-            min-height: 44px;
-            min-width: 44px;
-        }
-
-        .score-btn:active {
-            background: var(--glow-dim);
-            border-color: var(--glow);
-        }
-
-        .score-value {
-            min-width: 24px;
-            text-align: center;
-            font-weight: 700;
-            font-size: 14px;
+            white-space: nowrap;
         }
 
         /* Checklist */
@@ -775,7 +792,7 @@
             color: var(--text-secondary);
         }
 
-        /* Bottom Nav - Standardized */
+        /* Bottom Nav - Glassmorphism */
         .nav {
             position: fixed;
             bottom: 0;
@@ -791,12 +808,13 @@
             margin: 0 auto;
             display: flex;
             justify-content: space-around;
-            background: rgba(24, 24, 27, 0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(24px) saturate(180%);
+            -webkit-backdrop-filter: blur(24px) saturate(180%);
             border: 1px solid var(--border);
             border-radius: 18px;
             padding: 6px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
         }
 
         .nav-btn {
@@ -969,10 +987,58 @@
                 }
             ],
             games: [
-                { id: 'duathlon', icon: "🎱", title: "Duathlon de Bar", rules: "Baby-foot (3 matchs) + Billard (3 parties). Pas de pissette.", points: "1 pt/match" },
-                { id: 'beerpong', icon: "🍺", title: "Beer Pong", rules: "10 gobelets. Arthur met une balle → tout le monde boit !", points: "5 pts victoire" },
-                { id: 'blindtest', icon: "🎵", title: "Blind Test", rules: "Pop/Rock 2000 + Rap 2025 + 3 génériques TV.", points: "1 pt/réponse" },
-                { id: 'quiz', icon: "🧠", title: "Le Grand Quiz", rules: "Géo, L'Histoire du Sage, Les Dossiers, Culture G.", points: "2 pts/réponse" }
+                {
+                    id: 'duathlon',
+                    icon: "🎱",
+                    title: "Duathlon de Bar",
+                    points: "1 pt/match",
+                    rules: [
+                        "Baby-foot : 3 matchs en doublette (match en 5 points)",
+                        "Pas de pissette, pas de râteau (règles de bar strictes)",
+                        "Billard : 3 parties",
+                        "1 point par match gagné"
+                    ]
+                },
+                {
+                    id: 'beerpong',
+                    icon: "🍺",
+                    title: "Beer Pong",
+                    points: "5 pts victoire",
+                    rules: [
+                        "Relais par équipe, 10 gobelets de chaque côté",
+                        "Si vous mettez une balle → l'équipe adverse boit",
+                        "RÈGLE ROYALE : Si Arthur met une balle → TOUT LE MONDE boit",
+                        "Coude derrière la table en lançant",
+                        "Rebond compte double (2 verres)"
+                    ]
+                },
+                {
+                    id: 'blindtest',
+                    icon: "🎵",
+                    title: "Blind Test Génération Arthur",
+                    points: "1 pt/réponse",
+                    rules: [
+                        "Manche 1 : Pop/Rock Années 2000 (nos classiques)",
+                        "Manche 2 : Rap FR/US 2025 (la street cred)",
+                        "Bonus : 3 Génériques TV de notre enfance",
+                        "Le premier qui tape sur la table a la main",
+                        "1 point par bonne réponse"
+                    ]
+                },
+                {
+                    id: 'quiz',
+                    icon: "🧠",
+                    title: "Le Grand Quiz Final",
+                    points: "2 pts/réponse",
+                    rules: [
+                        "Thème 1 : Géographie & Cartes (capitales, voyages)",
+                        "Thème 2 : L'Histoire du Sage (taff, habitudes, couple)",
+                        "Thème 3 : Les Dossiers (dérapages et expressions de Radur)",
+                        "Thème 4 : Culture Générale (sport, etc.)",
+                        "Réponses notées sur papier pour éviter la triche",
+                        "2 points par bonne réponse"
+                    ]
+                }
             ],
             scores: { teamA: {}, teamB: {} }
         };
@@ -980,11 +1046,11 @@
         // Load state
         const savedChecks = JSON.parse(localStorage.getItem('evg-checks') || '{}');
         DATA.checklist.forEach(item => item.checked = savedChecks[item.id] || false);
-        DATA.scores = JSON.parse(localStorage.getItem('evg-scores') || '{"teamA":{},"teamB":{}}');
 
         const app = {
             currentView: 'home',
             chart: null,
+            expandedActivities: new Set(),
 
             init() {
                 this.createConfetti();
@@ -1068,8 +1134,29 @@
                     const saved = JSON.parse(localStorage.getItem('evg-checks') || '{}');
                     saved[id] = item.checked;
                     localStorage.setItem('evg-checks', JSON.stringify(saved));
+
+                    // Confetti on completion!
+                    const allChecked = DATA.checklist.every(i => i.checked);
+                    if (allChecked) {
+                        confetti({
+                            particleCount: 100,
+                            spread: 70,
+                            origin: { y: 0.6 },
+                            colors: ['#f59e0b', '#fbbf24', '#ea580c']
+                        });
+                    }
+
                     this.render();
                 }
+            },
+
+            toggleActivity(id) {
+                if (this.expandedActivities.has(id)) {
+                    this.expandedActivities.delete(id);
+                } else {
+                    this.expandedActivities.add(id);
+                }
+                this.render();
             },
 
             updateScore(gameId, team, delta) {
@@ -1089,6 +1176,15 @@
                 if (btn) {
                     btn.classList.add('copied');
                     btn.innerHTML = '✓ Copié !';
+
+                    // Confetti burst!
+                    confetti({
+                        particleCount: 50,
+                        spread: 50,
+                        origin: { y: 0.7 },
+                        colors: ['#f59e0b', '#fbbf24', '#ea580c', '#fff']
+                    });
+
                     setTimeout(() => {
                         btn.classList.remove('copied');
                         btn.innerHTML = '📋 Copier';
@@ -1252,32 +1348,25 @@
                     <strong>Enjeu :</strong> Perdants = vaisselle !
                 </div>
 
-                ${DATA.games.map(g => `
-                    <div class="game-card card">
-                        <div class="game-header">
-                            <span class="game-icon">${g.icon}</span>
-                            <span class="game-title">${g.title}</span>
-                        </div>
-                        <div class="game-rules">${g.rules}</div>
-                        <div class="game-footer">
-                            <div class="game-points">🎯 ${g.points}</div>
-                            <div class="score-counter">
-                                <div class="score-team">
-                                    <span class="score-team-label">A</span>
-                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamA',-1)">−</button>
-                                    <span class="score-value">${this.getScore(g.id, 'teamA')}</span>
-                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamA',1)">+</button>
-                                </div>
-                                <div class="score-team">
-                                    <span class="score-team-label">B</span>
-                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamB',-1)">−</button>
-                                    <span class="score-value">${this.getScore(g.id, 'teamB')}</span>
-                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamB',1)">+</button>
-                                </div>
+                ${DATA.games.map(g => {
+                    const isExpanded = this.expandedActivities.has(g.id);
+                    return `
+                    <div class="activity-card card ${isExpanded ? 'expanded' : ''}" onclick="app.toggleActivity('${g.id}')">
+                        <div class="activity-header">
+                            <div class="activity-header-left">
+                                <span class="activity-icon">${g.icon}</span>
+                                <span class="activity-title">${g.title}</span>
                             </div>
+                            <div class="activity-points">🎯 ${g.points}</div>
+                            <div class="activity-toggle">${isExpanded ? '▼' : '▶'} ${isExpanded ? 'Masquer' : 'Voir les règles'}</div>
+                        </div>
+                        <div class="activity-rules">
+                            <ul>
+                                ${g.rules.map(rule => `<li>${rule}</li>`).join('')}
+                            </ul>
                         </div>
                     </div>
-                `).join('')}
+                `}).join('')}
             `;
             },
 
