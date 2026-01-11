@@ -2280,7 +2280,7 @@
 
                     <!-- Action Buttons: Upload & Drive -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
-                        <button onclick="app.currentView = 'satchel'; app.render(); setTimeout(() => app.toggleSection('photos'), 100);" class="btn" style="background: linear-gradient(135deg, var(--gold-dim), var(--bg-card)); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto; font-weight: var(--weight-semibold);">
+                        <button onclick="app.currentView = 'satchel'; app.render(); setTimeout(() => { app.toggleSection('photos'); setTimeout(() => document.getElementById('photo-input')?.click(), 150); }, 100);" class="btn" style="background: linear-gradient(135deg, var(--gold-dim), var(--bg-card)); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto; font-weight: var(--weight-semibold);">
                             <span style="font-size: 28px; margin-bottom: 6px;">📷</span>
                             <span style="font-size: var(--text-base);">Ajouter Photo</span>
                         </button>
