@@ -557,10 +557,60 @@
             flex-shrink: 0;
         }
 
-        .timeline-desc {
-            font-size: var(--text-sm);
-            line-height: var(--leading-relaxed);
+        /* Typography - Handwritten Notes */
+        .handwritten,
+        .timeline-desc,
+        .logistics-desc,
+        .activity-rules li,
+        .quest-meta span {
+            font-family: 'Patrick Hand', cursive;
+            font-size: 16px;
+            /* Slightly larger for readability */
+            letter-spacing: 0.5px;
             color: var(--text-secondary);
+        }
+
+        .timeline-desc {
+            font-size: 17px;
+            line-height: 1.4;
+            color: #d4cfc3;
+            /* Lighter for contrast */
+        }
+
+        /* Timeline (The Map/Journal) - Restyling */
+        .timeline-day {
+            margin-bottom: 32px;
+            position: relative;
+            padding-left: 10px;
+            /* Space for the line */
+        }
+
+        .timeline-path {
+            position: absolute;
+            left: 32px;
+            /* Adjusted */
+            top: 50px;
+            bottom: 20px;
+            width: 3px;
+            background: url("data:image/svg+xml,%3Csvg width='4' height='10' viewBox='0 0 4 10' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M2 0 V10' stroke='%23d4a843' stroke-width='2' stroke-dasharray='4' opacity='0.4'/%3E%3C/svg%3E");
+            background-repeat: repeat-y;
+            /* Dashed line effect */
+        }
+
+        .timeline-event::before {
+            left: 16px;
+            /* Centered on line */
+            width: 14px;
+            height: 14px;
+            border-width: 3px;
+            background: var(--bg);
+            /* Hollow center look */
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+
+        .timeline-event.highlight::before {
+            background: var(--gold);
+            box-shadow: 0 0 15px var(--gold);
         }
 
         /* Satchel (Guide) - Accordion */
@@ -1313,273 +1363,336 @@
         DATA.checklist.forEach(item => item.checked = savedChecks[item.id] || false);
 
         // ============================================
-        // APP
+        // 🔥 EMBERS ANIMATION
+        // ============================================
+        class Embers {
+            constructor() {
+                this.canvas = document.getElementById('embers-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+                this.animate();
+            }
+
+            resize() {
+                this.canvas.width = window.innerWidth;
+                this.canvas.height = window.innerHeight;
+            }
+
+            createParticle() {
+                const x = Math.random() * this.canvas.width;
+                const y = this.canvas.height + Math.random() * 100;
+                const size = Math.random() * 2 + 0.5;
+                const speedY = Math.random() * 1 + 0.2; // Slow rise
+                const speedX = (Math.random() - 0.5) * 0.5; // Slight drift
+                const opacity = Math.random() * 0.5 + 0.2;
+                const color = `rgba(255, ${150 + Math.random() * 50}, 0, ${opacity})`; // Orange/Gold
+
+                this.particles.push({ x, y, size, speedY, speedX, color, opacity, life: 1 });
+            }
+
+            animate() {
+                this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+
+                if (this.particles.length < 40) { // Limit count
+                    if (Math.random() < 0.1) this.createParticle(); // Spawn rate
+                }
+
+                this.particles.forEach((p, index) => {
+                    p.y -= p.speedY; // Move up
+                    p.x += Math.sin(p.y * 0.01) * 0.5; // Wiggle
+                    p.life -= 0.002; // Fade out slowly
+
+                    if (p.life <= 0 || p.y < -10) {
+                        this.particles.splice(index, 1);
+                    } else {
+                        this.ctx.fillStyle = p.color;
+                        this.ctx.globalAlpha = p.life;
+                        this.ctx.beginPath();
+                        this.ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+                        this.ctx.fill();
+                    }
+                });
+
+                requestAnimationFrame(() => this.animate());
+            }
+        }
+
+        // ============================================
+        // APP INITIALIZATION
         // ============================================
         const app = {
-            currentView: 'campfire',
+            // ... existing app logic ...
+        };
+
+        // Start everything
+        new Embers();
+        app.init();
+        currentView: 'campfire',
             expandedSections: new Set(['rules']),
-            expandedGames: new Set(),
-            chart: null,
+                expandedGames: new Set(),
+                    chart: null,
 
-            init() {
-                this.bindNav();
-                this.render();
-            },
+                        init() {
+            this.bindNav();
+            this.render();
+        },
 
-            bindNav() {
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        this.currentView = btn.dataset.view;
-                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        this.render();
-                    });
+        bindNav() {
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', () => {
+                    this.currentView = btn.dataset.view;
+                    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    this.render();
                 });
-            },
+            });
+        },
 
-            // Helper to get real Date objects for events
-            getAllEvents() {
-                const year = 2026;
-                const month = 0; // Jan
-                // Robust mapping: check if string contains the day number
-                const getDayNum = (str) => {
-                    if (str.includes('16')) return 16;
-                    if (str.includes('17')) return 17;
-                    if (str.includes('18')) return 18;
-                    return 16; // default fallback
-                };
+        // Helper to get real Date objects for events
+        getAllEvents() {
+            const year = 2026;
+            const month = 0; // Jan
+            // Robust mapping: check if string contains the day number
+            const getDayNum = (str) => {
+                if (str.includes('16')) return 16;
+                if (str.includes('17')) return 17;
+                if (str.includes('18')) return 18;
+                return 16; // default fallback
+            };
 
-                const events = [];
-                DATA.schedule.forEach(dayGrp => {
-                    const dayNum = getDayNum(dayGrp.day);
-                    dayGrp.events.forEach(ev => {
-                        let h = 8, m = 0; // Default morning
-                        const t = ev.time.toLowerCase().replace('~', '').trim();
+            const events = [];
+            DATA.schedule.forEach(dayGrp => {
+                const dayNum = getDayNum(dayGrp.day);
+                dayGrp.events.forEach(ev => {
+                    let h = 8, m = 0; // Default morning
+                    const t = ev.time.toLowerCase().replace('~', '').trim();
 
-                        if (t.includes('h')) {
-                            const parts = t.split('h');
-                            h = parseInt(parts[0]) || 0;
-                            m = parseInt(parts[1]) || 0;
-                        } else if (t === 'midi') {
-                            h = 12;
-                        } else if (t.includes('après-midi')) {
-                            h = 14;
-                        }
+                    if (t.includes('h')) {
+                        const parts = t.split('h');
+                        h = parseInt(parts[0]) || 0;
+                        m = parseInt(parts[1]) || 0;
+                    } else if (t === 'midi') {
+                        h = 12;
+                    } else if (t.includes('après-midi')) {
+                        h = 14;
+                    }
 
-                        const date = new Date(year, month, dayNum, h, m);
-                        // Filter out invalid dates
-                        if (!isNaN(date.getTime())) {
-                            events.push({ ...ev, date });
-                        }
-                    });
+                    const date = new Date(year, month, dayNum, h, m);
+                    // Filter out invalid dates
+                    if (!isNaN(date.getTime())) {
+                        events.push({ ...ev, date });
+                    }
                 });
-                return events.sort((a, b) => a.date - b.date);
-            },
+            });
+            return events.sort((a, b) => a.date - b.date);
+        },
 
-            getCurrentQuest() {
-                const now = new Date(); // Use real time
-                const events = this.getAllEvents();
+        getCurrentQuest() {
+            const now = new Date(); // Use real time
+            const events = this.getAllEvents();
 
-                // If before first event
-                if (events.length > 0 && now < events[0].date) {
-                    return null;
-                }
+            // If before first event
+            if (events.length > 0 && now < events[0].date) {
+                return null;
+            }
 
-                // Find event distinctively active
-                // Simple logic: Event is active if we are past its start time, 
-                // and before the next event's start time.
-                for (let i = 0; i < events.length; i++) {
-                    const ev = events[i];
-                    const nextEv = events[i + 1];
+            // Find event distinctively active
+            // Simple logic: Event is active if we are past its start time, 
+            // and before the next event's start time.
+            for (let i = 0; i < events.length; i++) {
+                const ev = events[i];
+                const nextEv = events[i + 1];
 
-                    if (now >= ev.date) {
-                        if (!nextEv || now < nextEv.date) {
-                            return ev;
-                        }
+                if (now >= ev.date) {
+                    if (!nextEv || now < nextEv.date) {
+                        return ev;
                     }
                 }
-                return null;
-            },
+            }
+            return null;
+        },
 
-            getNextQuest() {
-                const now = new Date();
-                const events = this.getAllEvents();
-                return events.find(ev => ev.date > now) || null;
-            },
+        getNextQuest() {
+            const now = new Date();
+            const events = this.getAllEvents();
+            return events.find(ev => ev.date > now) || null;
+        },
 
-            toggleCheck(id) {
-                const item = DATA.checklist.find(i => i.id === id);
-                if (item) {
-                    item.checked = !item.checked;
-                    const saved = JSON.parse(localStorage.getItem('evg-checks') || '{}');
-                    saved[id] = item.checked;
-                    localStorage.setItem('evg-checks', JSON.stringify(saved));
+        toggleCheck(id) {
+            const item = DATA.checklist.find(i => i.id === id);
+            if (item) {
+                item.checked = !item.checked;
+                const saved = JSON.parse(localStorage.getItem('evg-checks') || '{}');
+                saved[id] = item.checked;
+                localStorage.setItem('evg-checks', JSON.stringify(saved));
 
-                    // Update DOM directly without full render
-                    const checkItems = document.querySelectorAll('.check-item');
-                    checkItems.forEach((el, index) => {
-                        const checkItem = DATA.checklist[index];
-                        if (checkItem && checkItem.id === id) {
-                            el.classList.toggle('checked', item.checked);
-                            const box = el.querySelector('.check-box');
-                            if (box) box.textContent = item.checked ? '✓' : '';
-                        }
+                // Update DOM directly without full render
+                const checkItems = document.querySelectorAll('.check-item');
+                checkItems.forEach((el, index) => {
+                    const checkItem = DATA.checklist[index];
+                    if (checkItem && checkItem.id === id) {
+                        el.classList.toggle('checked', item.checked);
+                        const box = el.querySelector('.check-box');
+                        if (box) box.textContent = item.checked ? '✓' : '';
+                    }
+                });
+
+                // Update badge
+                const badge = document.querySelector('[data-section="checklist"] .satchel-badge');
+                if (badge) {
+                    const count = DATA.checklist.filter(i => i.checked).length;
+                    badge.textContent = `${count}/${DATA.checklist.length}`;
+                }
+
+                // Confetti when all checked
+                if (DATA.checklist.every(i => i.checked)) {
+                    confetti({
+                        particleCount: 100,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
                     });
+                }
+            }
+        },
 
-                    // Update badge
-                    const badge = document.querySelector('[data-section="checklist"] .satchel-badge');
+        toggleSection(id) {
+            const section = document.querySelector(`[data-section="${id}"]`);
+            if (section) {
+                const isExpanded = section.classList.toggle('expanded');
+                if (isExpanded) {
+                    this.expandedSections.add(id);
+                } else {
+                    this.expandedSections.delete(id);
+                }
+
+                // Update toggle arrow
+                const toggle = section.querySelector('.satchel-toggle');
+                if (toggle) {
+                    toggle.style.transform = isExpanded ? 'rotate(90deg)' : 'rotate(0deg)';
+                }
+
+                // Initialize chart when budget is expanded
+                if (id === 'budget' && isExpanded) {
+                    setTimeout(() => {
+                        const ctx = document.getElementById('chart');
+                        if (ctx) {
+                            if (this.chart) this.chart.destroy();
+                            this.chart = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: DATA.budget.items.map(x => x.label),
+                                    datasets: [{
+                                        data: DATA.budget.items.map(x => x.value),
+                                        backgroundColor: DATA.budget.items.map(x => x.color),
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '70%',
+                                    plugins: { legend: { display: false } }
+                                }
+                            });
+                        }
+                    }, 100);
+                }
+
+                // Update badge for checklist if needed
+                if (id === 'checklist') {
+                    const badge = section.querySelector('.satchel-badge');
                     if (badge) {
                         const count = DATA.checklist.filter(i => i.checked).length;
                         badge.textContent = `${count}/${DATA.checklist.length}`;
                     }
-
-                    // Confetti when all checked
-                    if (DATA.checklist.every(i => i.checked)) {
-                        confetti({
-                            particleCount: 100,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
-                        });
-                    }
                 }
-            },
+            }
+        },
 
-            toggleSection(id) {
-                const section = document.querySelector(`[data-section="${id}"]`);
-                if (section) {
-                    const isExpanded = section.classList.toggle('expanded');
-                    if (isExpanded) {
-                        this.expandedSections.add(id);
-                    } else {
-                        this.expandedSections.delete(id);
-                    }
-
-                    // Update toggle arrow
-                    const toggle = section.querySelector('.satchel-toggle');
-                    if (toggle) {
-                        toggle.style.transform = isExpanded ? 'rotate(90deg)' : 'rotate(0deg)';
-                    }
-
-                    // Initialize chart when budget is expanded
-                    if (id === 'budget' && isExpanded) {
-                        setTimeout(() => {
-                            const ctx = document.getElementById('chart');
-                            if (ctx) {
-                                if (this.chart) this.chart.destroy();
-                                this.chart = new Chart(ctx, {
-                                    type: 'doughnut',
-                                    data: {
-                                        labels: DATA.budget.items.map(x => x.label),
-                                        datasets: [{
-                                            data: DATA.budget.items.map(x => x.value),
-                                            backgroundColor: DATA.budget.items.map(x => x.color),
-                                            borderWidth: 0
-                                        }]
-                                    },
-                                    options: {
-                                        responsive: true,
-                                        maintainAspectRatio: false,
-                                        cutout: '70%',
-                                        plugins: { legend: { display: false } }
-                                    }
-                                });
-                            }
-                        }, 100);
-                    }
-
-                    // Update badge for checklist if needed
-                    if (id === 'checklist') {
-                        const badge = section.querySelector('.satchel-badge');
-                        if (badge) {
-                            const count = DATA.checklist.filter(i => i.checked).length;
-                            badge.textContent = `${count}/${DATA.checklist.length}`;
-                        }
-                    }
+        toggleGame(id) {
+            const card = document.querySelector(`[data-game="${id}"]`);
+            if (card) {
+                const isExpanded = card.classList.toggle('expanded');
+                if (isExpanded) {
+                    this.expandedGames.add(id);
+                } else {
+                    this.expandedGames.delete(id);
                 }
-            },
-
-            toggleGame(id) {
-                const card = document.querySelector(`[data-game="${id}"]`);
-                if (card) {
-                    const isExpanded = card.classList.toggle('expanded');
-                    if (isExpanded) {
-                        this.expandedGames.add(id);
-                    } else {
-                        this.expandedGames.delete(id);
-                    }
-                    // Update toggle icon
-                    const toggle = card.querySelector('.activity-toggle');
-                    if (toggle) {
-                        toggle.textContent = isExpanded ? '▼' : '▶';
-                    }
+                // Update toggle icon
+                const toggle = card.querySelector('.activity-toggle');
+                if (toggle) {
+                    toggle.textContent = isExpanded ? '▼' : '▶';
                 }
-            },
+            }
+        },
 
-            copyAddress() {
-                navigator.clipboard.writeText(DATA.airbnb.address);
-                const btn = document.getElementById('copy-btn');
-                if (btn) {
-                    btn.classList.add('copied');
-                    btn.innerHTML = '✓ Copié';
-                    confetti({
-                        particleCount: 40,
-                        spread: 50,
-                        origin: { y: 0.8 },
-                        colors: ['#d4a843', '#f0c654', '#fff']
-                    });
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
-                        btn.innerHTML = '📋 Copier';
-                    }, 2000);
-                }
-            },
-
-            openRecipe(key) {
-                const recipe = DATA.recipes[key];
-                if (recipe) {
-                    document.getElementById('modal-title').innerHTML = recipe.title;
-                    document.getElementById('modal-content').innerHTML = recipe.content;
-                    document.getElementById('modal').classList.add('open');
-                }
-            },
-
-            closeModal(e) {
-                if (e.target.id === 'modal') {
-                    document.getElementById('modal').classList.remove('open');
-                }
-            },
-
-            navigate(view) {
-                this.currentView = view;
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === view);
+        copyAddress() {
+            navigator.clipboard.writeText(DATA.airbnb.address);
+            const btn = document.getElementById('copy-btn');
+            if (btn) {
+                btn.classList.add('copied');
+                btn.innerHTML = '✓ Copié';
+                confetti({
+                    particleCount: 40,
+                    spread: 50,
+                    origin: { y: 0.8 },
+                    colors: ['#d4a843', '#f0c654', '#fff']
                 });
-                this.render();
-            },
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '📋 Copier';
+                }, 2000);
+            }
+        },
 
-            render() {
-                const el = document.getElementById('app');
-                el.innerHTML = '';
-                el.classList.remove('fade-in');
-                void el.offsetWidth;
-                el.classList.add('fade-in');
+        openRecipe(key) {
+            const recipe = DATA.recipes[key];
+            if (recipe) {
+                document.getElementById('modal-title').innerHTML = recipe.title;
+                document.getElementById('modal-content').innerHTML = recipe.content;
+                document.getElementById('modal').classList.add('open');
+            }
+        },
 
-                switch (this.currentView) {
-                    case 'campfire': this.renderCampfire(el); break;
-                    case 'map': this.renderMap(el); break;
-                    case 'satchel': this.renderSatchel(el); break;
-                }
-            },
+        closeModal(e) {
+            if (e.target.id === 'modal') {
+                document.getElementById('modal').classList.remove('open');
+            }
+        },
 
-            // ============================================
-            // 🔥 THE CAMPFIRE (Home/Live Dashboard)
-            // ============================================
-            renderCampfire(el) {
-                const current = this.getCurrentQuest();
-                const next = this.getNextQuest();
+        navigate(view) {
+            this.currentView = view;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            this.render();
+        },
 
-                el.innerHTML = `
+        render() {
+            const el = document.getElementById('app');
+            el.innerHTML = '';
+            el.classList.remove('fade-in');
+            void el.offsetWidth;
+            el.classList.add('fade-in');
+
+            switch (this.currentView) {
+                case 'campfire': this.renderCampfire(el); break;
+                case 'map': this.renderMap(el); break;
+                case 'satchel': this.renderSatchel(el); break;
+            }
+        },
+
+        // ============================================
+        // 🔥 THE CAMPFIRE (Home/Live Dashboard)
+        // ============================================
+        renderCampfire(el) {
+            const current = this.getCurrentQuest();
+            const next = this.getNextQuest();
+
+            el.innerHTML = `
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
@@ -1623,30 +1736,30 @@
                         </div>
                     </div>
                 `;
-            },
+        },
 
-            // ============================================
-            // 🗺️ THE MAP (Planning/Timeline)
-            // ============================================
-            renderMap(el) {
-                let html = `
+        // ============================================
+        // 🗺️ THE MAP (Planning/Timeline)
+        // ============================================
+        renderMap(el) {
+            let html = `
                     <div class="header">
                         <h1 class="header-title">La Carte</h1>
                         <p class="header-sub">Clique sur les repas pour les recettes</p>
                     </div>
                 `;
 
-                DATA.schedule.forEach(day => {
-                    html += `
+            DATA.schedule.forEach(day => {
+                html += `
                         <div class="timeline-day">
                             <div class="timeline-day-header">📜 ${day.day}</div>
                             <div class="timeline-path"></div>
                     `;
 
-                    day.events.forEach(ev => {
-                        const hasRecipe = ev.recipe ? 'has-recipe' : '';
-                        const onclick = ev.recipe ? `onclick="app.openRecipe('${ev.recipe}')"` : '';
-                        html += `
+                day.events.forEach(ev => {
+                    const hasRecipe = ev.recipe ? 'has-recipe' : '';
+                    const onclick = ev.recipe ? `onclick="app.openRecipe('${ev.recipe}')"` : '';
+                    html += `
                             <div class="timeline-event card ${ev.highlight ? 'highlight' : ''} ${hasRecipe}" ${onclick}>
                                 <div class="timeline-top">
                                     <div class="timeline-title">${ev.icon} ${ev.title}</div>
@@ -1655,26 +1768,26 @@
                                 <div class="timeline-desc">${ev.details}</div>
                             </div>
                         `;
-                    });
-
-                    html += `</div>`;
                 });
 
-                el.innerHTML = html;
-            },
+                html += `</div>`;
+            });
 
-            // ============================================
-            // 🎒 THE SATCHEL (Guide)
-            // ============================================
-            renderSatchel(el) {
-                const rulesExpanded = this.expandedSections.has('rules');
-                const budgetExpanded = this.expandedSections.has('budget');
-                const checklistExpanded = this.expandedSections.has('checklist');
-                const logisticsExpanded = this.expandedSections.has('logistics');
+            el.innerHTML = html;
+        },
 
-                const checkedCount = DATA.checklist.filter(i => i.checked).length;
+        // ============================================
+        // 🎒 THE SATCHEL (Guide)
+        // ============================================
+        renderSatchel(el) {
+            const rulesExpanded = this.expandedSections.has('rules');
+            const budgetExpanded = this.expandedSections.has('budget');
+            const checklistExpanded = this.expandedSections.has('checklist');
+            const logisticsExpanded = this.expandedSections.has('logistics');
 
-                el.innerHTML = `
+            const checkedCount = DATA.checklist.filter(i => i.checked).length;
+
+            el.innerHTML = `
                     <div class="header">
                         <h1 class="header-title">La Besace</h1>
                         <p class="header-sub">Tout ce qu'il faut savoir</p>
@@ -1697,8 +1810,8 @@
                                     <strong>Enjeu :</strong> Perdants = vaisselle du brunch !
                                 </div>
                                 ${DATA.games.map(g => {
-                    const isExpanded = this.expandedGames.has(g.id);
-                    return `
+                const isExpanded = this.expandedGames.has(g.id);
+                return `
                                         <div class="activity-card card ${isExpanded ? 'expanded' : ''}" data-game="${g.id}" onclick="event.stopPropagation(); app.toggleGame('${g.id}')">
                                             <div class="activity-header">
                                                 <span class="activity-icon">${g.icon}</span>
@@ -1715,7 +1828,7 @@
                                             </div>
                                         </div>
                                     `;
-                }).join('')}
+            }).join('')}
                             </div>
                         </div>
                     </div>
@@ -1818,33 +1931,33 @@
                     </div>
                 `;
 
-                // Render chart if budget is expanded
-                if (budgetExpanded) {
-                    setTimeout(() => {
-                        const ctx = document.getElementById('chart');
-                        if (ctx) {
-                            if (this.chart) this.chart.destroy();
-                            this.chart = new Chart(ctx, {
-                                type: 'doughnut',
-                                data: {
-                                    labels: DATA.budget.items.map(x => x.label),
-                                    datasets: [{
-                                        data: DATA.budget.items.map(x => x.value),
-                                        backgroundColor: DATA.budget.items.map(x => x.color),
-                                        borderWidth: 0
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    cutout: '70%',
-                                    plugins: { legend: { display: false } }
-                                }
-                            });
-                        }
-                    }, 100);
-                }
+            // Render chart if budget is expanded
+            if (budgetExpanded) {
+                setTimeout(() => {
+                    const ctx = document.getElementById('chart');
+                    if (ctx) {
+                        if (this.chart) this.chart.destroy();
+                        this.chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: DATA.budget.items.map(x => x.label),
+                                datasets: [{
+                                    data: DATA.budget.items.map(x => x.value),
+                                    backgroundColor: DATA.budget.items.map(x => x.color),
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '70%',
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                }, 100);
             }
+        }
         };
 
         document.addEventListener('DOMContentLoaded', () => app.init());
