@@ -1,4 +1,4 @@
-const CACHE_NAME = 'evg-arthur-v4';
+const CACHE_NAME = 'evg-arthur-v5';
 const ASSETS = [
     './',
     './index.html',

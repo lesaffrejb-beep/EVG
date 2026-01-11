@@ -1575,7 +1575,7 @@
                         const desc = this.getWeatherDesc(code);
                         const el = document.getElementById('weather-widget');
                         if (el) {
-                            el.innerHTML = `🌡️ ${temp}°C • ${desc}`;
+                            el.innerHTML = `${temp}°C • ${desc}`;
                         }
                     })
                     .catch(err => {
