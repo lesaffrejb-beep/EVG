@@ -1483,6 +1483,39 @@
                 });
             },
 
+            fetchWeather() {
+                // Thouars Coordinates
+                const lat = 46.9377;
+                const lon = -0.2844;
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=Europe%2FParis`;
+
+                fetch(url)
+                    .then(r => r.json())
+                    .then(data => {
+                        const temp = Math.round(data.current.temperature_2m);
+                        const code = data.current.weather_code;
+                        const desc = this.getWeatherDesc(code);
+                        const el = document.getElementById('weather-widget');
+                        if (el) {
+                            el.innerHTML = `🌡️ ${temp}°C • ${desc}`;
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Weather error:', err);
+                        const el = document.getElementById('weather-widget');
+                        if (el) el.innerHTML = "Météo indisponible";
+                    });
+            },
+
+            getWeatherDesc(code) {
+                if (code === 0) return "Ciel dégagé ☀️";
+                if (code <= 3) return "Nuageux ☁️";
+                if (code <= 48) return "Brouillard 🌫️";
+                if (code <= 67) return "Pluie 🌧️";
+                if (code <= 77) return "Neige ❄️";
+                return "Variable";
+            },
+
             attachListeners() {
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
@@ -1826,8 +1859,8 @@
             renderMap(el) {
                 let html = `
                     <div class="header">
-                        <h1 class="header-title">La Carte</h1>
-                        <p class="header-sub">Clique sur les repas pour les recettes</p>
+                        <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
+                        <h1 class="header-title">L'Aventure d'Arthur</h1>
                     </div>
                 `;
 
