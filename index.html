@@ -141,15 +141,15 @@
             z-index: 1;
         }
 
-        /* Typography - Cinzel for Headers */
-        #embers-canvas {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            pointer-events: none;
-            z-index: 1;
+        /* Countdown Typography */
+        .countdown {
+            font-family: 'Cinzel', serif;
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--gold);
+            text-align: center;
+            margin: 10px 0 20px;
+            text-shadow: 0 0 10px rgba(212, 168, 67, 0.5);
         }
 
         /* Countdown Typography */
@@ -1247,6 +1247,7 @@
             <button class="nav-btn active" data-view="campfire"><span>🔥</span>Le Feu</button>
             <button class="nav-btn" data-view="map"><span>🗺️</span>La Carte</button>
             <button class="nav-btn" data-view="satchel"><span>🎒</span>La Besace</button>
+            <button class="nav-btn" data-view="grimoire"><span>📜</span>Grimoire</button>
         </div>
     </nav>
 
@@ -1493,6 +1494,9 @@
 
                 // Fetch Weather
                 this.fetchWeather();
+
+                // Start Countdown
+                setInterval(() => this.updateCountdown(), 1000);
 
                 // PWA Install
                 window.addEventListener('beforeinstallprompt', (e) => {
@@ -1901,6 +1905,7 @@
                     case 'campfire': this.renderCampfire(el); break;
                     case 'map': this.renderMap(el); break;
                     case 'satchel': this.renderSatchel(el); break;
+                    case 'grimoire': this.renderGrimoire(el); break;
                 }
             },
 
@@ -1915,6 +1920,7 @@
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
+                        <div class="countdown" id="countdown">--j --h --m --s</div>
                     </div>
 
                     ${current ? `
