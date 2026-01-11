@@ -1307,24 +1307,69 @@
                 });
             },
 
-            // Demo state: Show Paintball as current activity (Saturday 14h30)
-            getCurrentQuest() {
-                return {
-                    icon: "🔫",
-                    title: "Paintball 79",
-                    time: "14h30",
-                    location: "Rigné",
-                    details: "9 joueurs • ~2h de jeu"
+            // Helper to get real Date objects for events
+            getAllEvents() {
+                const year = 2026;
+                const month = 0; // Jan
+                const dayMap = {
+                    "VENDREDI 16 JANVIER": 16,
+                    "SAMEDI 17 JANVIER": 17,
+                    "DIMANCHE 18 JANVIER": 18
                 };
+
+                const events = [];
+                DATA.schedule.forEach(dayGrp => {
+                    const dayNum = dayMap[dayGrp.day];
+                    dayGrp.events.forEach(ev => {
+                        let h = 8, m = 0; // Default morning
+                        const t = ev.time.toLowerCase().replace('~', '').trim();
+
+                        if (t.includes('h')) {
+                            const parts = t.split('h');
+                            h = parseInt(parts[0]) || 0;
+                            m = parseInt(parts[1]) || 0;
+                        } else if (t === 'midi') {
+                            h = 12;
+                        } else if (t.includes('après-midi')) {
+                            h = 14;
+                        }
+
+                        const date = new Date(year, month, dayNum, h, m);
+                        events.push({ ...ev, date });
+                    });
+                });
+                return events.sort((a, b) => a.date - b.date);
+            },
+
+            getCurrentQuest() {
+                const now = new Date(); // Use real time
+                const events = this.getAllEvents();
+
+                // If before first event
+                if (events.length > 0 && now < events[0].date) {
+                    return null;
+                }
+
+                // Find event distinctively active
+                // Simple logic: Event is active if we are past its start time, 
+                // and before the next event's start time.
+                for (let i = 0; i < events.length; i++) {
+                    const ev = events[i];
+                    const nextEv = events[i + 1];
+
+                    if (now >= ev.date) {
+                        if (!nextEv || now < nextEv.date) {
+                            return ev;
+                        }
+                    }
+                }
+                return null;
             },
 
             getNextQuest() {
-                return {
-                    icon: "🏆",
-                    title: "Olympiades",
-                    time: "18h00",
-                    location: "Airbnb"
-                };
+                const now = new Date();
+                const events = this.getAllEvents();
+                return events.find(ev => ev.date > now) || null;
             },
 
             toggleCheck(id) {
@@ -1506,6 +1551,7 @@
                         <p class="header-sub">Le Sage Dynamo part à l'aventure</p>
                     </div>
 
+                    ${current ? `
                     <!-- Current Quest -->
                     <div class="quest-card card">
                         <div class="quest-label">
@@ -1515,28 +1561,11 @@
                         <div class="quest-title">${current.icon} ${current.title}</div>
                         <div class="quest-meta">
                             <span>🕐 ${current.time}</span>
-                            <span>📍 ${current.location}</span>
+                            <span>📍 ${current.details}</span>
                         </div>
-                        <div class="paintball-stats">
-                            <div class="paintball-stat">
-                                <div class="paintball-stat-value">9</div>
-                                <div class="paintball-stat-label">Joueurs</div>
-                            </div>
-                            <div class="paintball-stat">
-                                <div class="paintball-stat-value">2h</div>
-                                <div class="paintball-stat-label">De jeu</div>
-                            </div>
-                            <div class="paintball-stat">
-                                <div class="paintball-stat-value">30€</div>
-                                <div class="paintball-stat-label">/Joueur</div>
-                            </div>
-                            <div class="paintball-stat">
-                                <div class="paintball-stat-value">200€</div>
-                                <div class="paintball-stat-label">Caution</div>
-                            </div>
-                        </div>
-                    </div>
+                    </div>` : ''}
 
+                    ${next ? `
                     <!-- Next Quest -->
                     <div class="next-quest card" onclick="app.navigate('map')">
                         <div class="next-quest-label">📍 Prochaine étape</div>
@@ -1544,11 +1573,11 @@
                             <div class="next-quest-icon">${next.icon}</div>
                             <div class="next-quest-info">
                                 <h4>${next.title}</h4>
-                                <p>${next.time} • ${next.location}</p>
+                                <p>${next.time} • ${next.details}</p>
                             </div>
                             <div class="next-quest-arrow">→</div>
                         </div>
-                    </div>
+                    </div>` : ''}
 
                     <!-- QG Location -->
                     <div class="location-card card">
