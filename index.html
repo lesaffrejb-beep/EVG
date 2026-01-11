@@ -37,15 +37,15 @@
             --text-secondary: #d4cfc3;
             --text-muted: #a09688;
 
-            /* Typography - Font Sizes */
-            --text-h1: 32px;
-            --text-h2: 22px;
-            --text-h3: 17px;
-            --text-h4: 15px;
-            --text-base: 13px;
-            --text-sm: 12px;
-            --text-xs: 11px;
-            --text-xxs: 10px;
+            /* Typography - Font Sizes (Enhanced) */
+            --text-h1: 36px;
+            --text-h2: 26px;
+            --text-h3: 20px;
+            --text-h4: 17px;
+            --text-base: 14px;
+            --text-sm: 13px;
+            --text-xs: 12px;
+            --text-xxs: 11px;
 
             /* Typography - Font Weights */
             --weight-normal: 400;
@@ -55,10 +55,10 @@
             --weight-extrabold: 800;
 
             /* Typography - Line Heights */
-            --leading-tight: 1.2;
-            --leading-snug: 1.4;
-            --leading-normal: 1.6;
-            --leading-relaxed: 1.7;
+            --leading-tight: 1.25;
+            --leading-snug: 1.45;
+            --leading-normal: 1.65;
+            --leading-relaxed: 1.8;
 
             /* Typography - Letter Spacing */
             --tracking-tight: -0.02em;
@@ -131,14 +131,39 @@
         }
 
         /* Typography - Cinzel for Headers */
+        /* Typography - Cinzel for Headers */
         h1,
         h2,
         h3,
         .header-title,
-        .section-title {
+        .section-title,
+        .satchel-title,
+        .quest-title {
             font-family: 'Cinzel', serif;
-            font-weight: 600;
+            font-weight: 700;
             letter-spacing: 0.5px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            /* LOTR depth */
+        }
+
+        /* Satchel Header */
+        .satchel-title {
+            font-size: 20px;
+            /* Bigger menu titles */
+            color: var(--gold);
+        }
+
+        /* Hide badges (previews) when collapsed */
+        .satchel-badge {
+            opacity: 0;
+            transform: translateX(10px);
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .satchel-section.expanded .satchel-badge {
+            opacity: 1;
+            transform: translateX(0);
         }
 
         /* App Container */
