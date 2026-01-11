@@ -1720,6 +1720,10 @@
                             <div class="location-info">
                                 <h4>QG - Airbnb</h4>
                                 <p>${DATA.airbnb.address}</p>
+                                <!-- Weather Widget -->
+                                <div id="weather-widget" style="font-size: 13px; color: var(--gold); margin-top: 4px; display: flex; align-items: center; gap: 6px; font-family: 'Patrick Hand', cursive;">
+                                    <span class="pulse" style="width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%;"></span> Chargement météo...
+                                </div>
                             </div>
                         </div>
                         <div class="location-actions" style="margin-top:12px; display:flex; gap:8px;">
@@ -1728,12 +1732,21 @@
                         </div>
                     </div>
 
+                    <!-- Action Buttons: Upload & Drive -->
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
+                        <button onclick="app.uploadPhoto()" class="btn" style="background: var(--bg-card); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto;">
+                            <span style="font-size: 24px; margin-bottom: 4px;">📷</span>
+                            <span>Ajouter Photo</span>
+                        </button>
+                        <a href="https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK" target="_blank" class="btn" style="background: var(--bg-card); border-color: var(--text-muted); color: var(--text-secondary); flex-direction: column; padding: 16px; height: auto;">
+                            <span style="font-size: 24px; margin-bottom: 4px;">📁</span>
+                            <span>Voir Drive</span>
+                        </a>
+                    </div>
+
                     <!-- Reminder -->
                     <div class="alert" style="margin-top:12px;">
                         <strong>⚠️ Rappel :</strong> Prépare ton animation 15-20 min + tes photos !
-                        <div style="margin-top:12px;">
-                            <a href="https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK" target="_blank" class="btn btn-gold">📁 Accéder au Drive</a>
-                        </div>
                     </div>
                 `;
         },
