@@ -1761,90 +1761,157 @@
 
                 setTimeout(() => input.click(), 0);
             },
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = 'image/*';
-            input.capture = 'environment'; // Force camera
-            input.style.display = 'none';
-            document.body.appendChild(input);
 
-            input.onchange = (e) => {
-                const file = e.target.files[0];
-                if (file) {
-                    alert("Photo OK ! Envoi vers le Drive...");
-                    window.open('https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK', '_blank');
-                }
-                document.body.removeChild(input);
-            };
+            // Countdown Logic
+            getCountdown() {
+                const target = new Date('2026-01-16T18:01:00').getTime();
+                const now = new Date().getTime();
+                const diff = target - now;
 
-            // Trigger click
-            setTimeout(() => input.click(), 0);
+                if (diff < 0) return "00j 00h 00m 00s";
+
+                const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+                const hours = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                const seconds = Math.floor((diff % (1000 * 60)) / 1000);
+
+                return `${days}j ${hours}h ${minutes}m ${seconds}s`;
             },
 
-        copyAddress() {
-            navigator.clipboard.writeText(DATA.airbnb.address);
-            const btn = document.getElementById('copy-btn');
-            if (btn) {
-                btn.classList.add('copied');
-                btn.innerHTML = '✓ Copié';
+            updateCountdown() {
+                const el = document.getElementById('countdown');
+                if (el) {
+                    el.innerText = this.getCountdown();
+                }
+            },
+
+            // ============================================
+            // 📜 THE GRIMOIRE (Guestbook)
+            // ============================================
+            renderGrimoire(el) {
+                el.innerHTML = `
+                    <div class="header">
+                        <h1 class="header-title">Le Grimoire</h1>
+                        <p class="header-sub">Laisse une trace pour l'éternité</p>
+                    </div>
+
+                    <div class="card" style="padding: 24px;">
+                        <p class="handwritten" style="margin-bottom: 20px; text-align: center;">
+                            "Ici, vos mots seront scellés et révélés au Sage Dynamo, un par un, chaque semaine après son retour..."
+                        </p>
+
+                        <form onsubmit="event.preventDefault(); app.submitGuestbook(this);" style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Titre du Parchemin</label>
+                                <input type="text" name="title" required placeholder="Ex: Souvenir du Gouffre de Helm..." 
+                                    style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Crimson Text', serif;">
+                            </div>
+
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Ton Message</label>
+                                <textarea name="message" required rows="5" placeholder="Écris ton message ici..."
+                                    style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Crimson Text', serif; resize: none;"></textarea>
+                            </div>
+
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Signé</label>
+                                <input type="text" name="author" required placeholder="Ton Nom (ou ton titre noble)"
+                                    style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Crimson Text', serif;">
+                            </div>
+
+                            <button type="submit" class="btn btn-gold" style="justify-content: center; margin-top: 10px;">
+                                🖋️ Sceller le Message
+                            </button>
+                        </form>
+                    </div>
+                `;
+            },
+
+            submitGuestbook(form) {
+                const data = {
+                    title: form.title.value,
+                    message: form.message.value,
+                    author: form.author.value,
+                    date: new Date().toISOString()
+                };
+
+                // SIMULATION -> Ready for Supabase
+                console.log("Guestbook Data:", data);
+
+                alert("✨ Ton message a été scellé dans le Grimoire !");
+                form.reset();
                 confetti({
-                    particleCount: 40,
-                    spread: 50,
-                    origin: { y: 0.8 },
-                    colors: ['#d4a843', '#f0c654', '#fff']
+                    particleCount: 60,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#d4a843', '#ffffff']
                 });
-                setTimeout(() => {
-                    btn.classList.remove('copied');
-                    btn.innerHTML = '📋 Copier';
-                }, 2000);
-            }
-        },
+            },
 
-        openRecipe(key) {
-            const recipe = DATA.recipes[key];
-            if (recipe) {
-                document.getElementById('modal-title').innerHTML = recipe.title;
-                document.getElementById('modal-content').innerHTML = recipe.content;
-                document.getElementById('modal').classList.add('open');
-            }
-        },
+            copyAddress() {
+                navigator.clipboard.writeText(DATA.airbnb.address);
+                const btn = document.getElementById('copy-btn');
+                if (btn) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '✓ Copié';
+                    confetti({
+                        particleCount: 40,
+                        spread: 50,
+                        origin: { y: 0.8 },
+                        colors: ['#d4a843', '#f0c654', '#fff']
+                    });
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = '📋 Copier';
+                    }, 2000);
+                }
+            },
 
-        closeModal(e) {
-            if (e.target.id === 'modal') {
-                document.getElementById('modal').classList.remove('open');
-            }
-        },
+            openRecipe(key) {
+                const recipe = DATA.recipes[key];
+                if (recipe) {
+                    document.getElementById('modal-title').innerHTML = recipe.title;
+                    document.getElementById('modal-content').innerHTML = recipe.content;
+                    document.getElementById('modal').classList.add('open');
+                }
+            },
 
-        navigate(view) {
-            this.currentView = view;
-            document.querySelectorAll('.nav-btn').forEach(btn => {
-                btn.classList.toggle('active', btn.dataset.view === view);
-            });
-            this.render();
-        },
+            closeModal(e) {
+                if (e.target.id === 'modal') {
+                    document.getElementById('modal').classList.remove('open');
+                }
+            },
 
-        render() {
-            const el = document.getElementById('app');
-            el.innerHTML = '';
-            el.classList.remove('fade-in');
-            void el.offsetWidth;
-            el.classList.add('fade-in');
+            navigate(view) {
+                this.currentView = view;
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                this.render();
+            },
 
-            switch (this.currentView) {
-                case 'campfire': this.renderCampfire(el); break;
-                case 'map': this.renderMap(el); break;
-                case 'satchel': this.renderSatchel(el); break;
-            }
-        },
+            render() {
+                const el = document.getElementById('app');
+                el.innerHTML = '';
+                el.classList.remove('fade-in');
+                void el.offsetWidth;
+                el.classList.add('fade-in');
 
-        // ============================================
-        // 🔥 THE CAMPFIRE (Home/Live Dashboard)
-        // ============================================
-        renderCampfire(el) {
-            const current = this.getCurrentQuest();
-            const next = this.getNextQuest();
+                switch (this.currentView) {
+                    case 'campfire': this.renderCampfire(el); break;
+                    case 'map': this.renderMap(el); break;
+                    case 'satchel': this.renderSatchel(el); break;
+                }
+            },
 
-            el.innerHTML = `
+            // ============================================
+            // 🔥 THE CAMPFIRE (Home/Live Dashboard)
+            // ============================================
+            renderCampfire(el) {
+                const current = this.getCurrentQuest();
+                const next = this.getNextQuest();
+
+                el.innerHTML = `
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
@@ -1900,34 +1967,34 @@
                         <strong>⚠️ Rappel :</strong> Prépare ton animation 15-20 min + tes photos !
                     </div>
                 `;
-        },
+            },
 
-        // ============================================
-        // 🗺️ THE MAP (Planning/Timeline)
-        // ============================================
-        renderMap(el) {
-            let html = `
+            // ============================================
+            // 🗺️ THE MAP (Planning/Timeline)
+            // ============================================
+            renderMap(el) {
+                let html = `
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
                     </div>
                 `;
 
-            DATA.schedule.forEach(day => {
-                html += `
+                DATA.schedule.forEach(day => {
+                    html += `
                         <div class="timeline-day">
                             <div class="timeline-day-header">📜 ${day.day}</div>
                             <div class="timeline-path"></div>
                     `;
 
-                day.events.forEach(ev => {
-                    // Recipe Badge logic instead of icon overlay
-                    const recipeBtn = ev.recipe ?
-                        `<div class="recipe-badge" onclick="event.stopPropagation(); app.openRecipe('${ev.recipe}')">
+                    day.events.forEach(ev => {
+                        // Recipe Badge logic instead of icon overlay
+                        const recipeBtn = ev.recipe ?
+                            `<div class="recipe-badge" onclick="event.stopPropagation(); app.openRecipe('${ev.recipe}')">
                                 🥣 Voir Recette
                              </div>` : '';
 
-                    html += `
+                        html += `
                             <div class="timeline-event card ${ev.highlight ? 'highlight' : ''}">
                                 <div class="timeline-top">
                                     <div class="timeline-title">${ev.icon} ${ev.title}</div>
@@ -1937,26 +2004,26 @@
                                 ${recipeBtn}
                             </div>
                         `;
+                    });
+
+                    html += `</div>`;
                 });
 
-                html += `</div>`;
-            });
+                el.innerHTML = html;
+            },
 
-            el.innerHTML = html;
-        },
+            // ============================================
+            // 🎒 THE SATCHEL (Guide)
+            // ============================================
+            renderSatchel(el) {
+                const rulesExpanded = this.expandedSections.has('rules');
+                const budgetExpanded = this.expandedSections.has('budget');
+                const checklistExpanded = this.expandedSections.has('checklist');
+                const logisticsExpanded = this.expandedSections.has('logistics');
 
-        // ============================================
-        // 🎒 THE SATCHEL (Guide)
-        // ============================================
-        renderSatchel(el) {
-            const rulesExpanded = this.expandedSections.has('rules');
-            const budgetExpanded = this.expandedSections.has('budget');
-            const checklistExpanded = this.expandedSections.has('checklist');
-            const logisticsExpanded = this.expandedSections.has('logistics');
+                const checkedCount = DATA.checklist.filter(i => i.checked).length;
 
-            const checkedCount = DATA.checklist.filter(i => i.checked).length;
-
-            el.innerHTML = `
+                el.innerHTML = `
                     <div class="header">
                         <h1 class="header-title">La Besace</h1>
                         <p class="header-sub">Tout ce qu'il faut savoir</p>
@@ -1979,8 +2046,8 @@
                                     <strong>Enjeu :</strong> Perdants = vaisselle du brunch !
                                 </div>
                                 ${DATA.games.map(g => {
-                const isExpanded = this.expandedGames.has(g.id);
-                return `
+                    const isExpanded = this.expandedGames.has(g.id);
+                    return `
                                         <div class="activity-card card ${isExpanded ? 'expanded' : ''}" data-game="${g.id}" onclick="event.stopPropagation(); app.toggleGame('${g.id}')">
                                             <div class="activity-header">
                                                 <span class="activity-icon">${g.icon}</span>
@@ -1997,7 +2064,7 @@
                                             </div>
                                         </div>
                                     `;
-            }).join('')}
+                }).join('')}
                             </div>
                         </div>
                     </div>
@@ -2100,33 +2167,33 @@
                     </div>
                 `;
 
-            // Render chart if budget is expanded
-            if (budgetExpanded) {
-                setTimeout(() => {
-                    const ctx = document.getElementById('chart');
-                    if (ctx) {
-                        if (this.chart) this.chart.destroy();
-                        this.chart = new Chart(ctx, {
-                            type: 'doughnut',
-                            data: {
-                                labels: DATA.budget.items.map(x => x.label),
-                                datasets: [{
-                                    data: DATA.budget.items.map(x => x.value),
-                                    backgroundColor: DATA.budget.items.map(x => x.color),
-                                    borderWidth: 0
-                                }]
-                            },
-                            options: {
-                                responsive: true,
-                                maintainAspectRatio: false,
-                                cutout: '70%',
-                                plugins: { legend: { display: false } }
-                            }
-                        });
-                    }
-                }, 100);
+                // Render chart if budget is expanded
+                if (budgetExpanded) {
+                    setTimeout(() => {
+                        const ctx = document.getElementById('chart');
+                        if (ctx) {
+                            if (this.chart) this.chart.destroy();
+                            this.chart = new Chart(ctx, {
+                                type: 'doughnut',
+                                data: {
+                                    labels: DATA.budget.items.map(x => x.label),
+                                    datasets: [{
+                                        data: DATA.budget.items.map(x => x.value),
+                                        backgroundColor: DATA.budget.items.map(x => x.color),
+                                        borderWidth: 0
+                                    }]
+                                },
+                                options: {
+                                    responsive: true,
+                                    maintainAspectRatio: false,
+                                    cutout: '70%',
+                                    plugins: { legend: { display: false } }
+                                }
+                            });
+                        }
+                    }, 100);
+                }
             }
-        }
         };
 
         // Initialize App and Embers
