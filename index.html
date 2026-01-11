@@ -1479,12 +1479,12 @@
         // ============================================
 
         // SUPABASE CLIENT
-        let supabase = null;
+        let supabaseClient = null;
         try {
             const supabaseUrl = 'https://puhgwvbxlrdpuyczsnzm.supabase.co';
             const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1aGd3dmJ4bHJkcHV5Y3pzbnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNDI3MzYsImV4cCI6MjA4MzcxODczNn0.RARI56JSAsvXviMsVfpQF_aoiFiGxTn0n8ZZAbGNaB4';
             if (window.supabase) {
-                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+                supabaseClient = window.supabase.createClient(supabaseUrl, supabaseKey);
             } else {
                 console.warn("Supabase library not found in window");
             }
@@ -1519,6 +1519,50 @@
 
             fetchWeather() {
                 // Thouars Coordinates
+                const lat = 46.9377;
+                const lon = -0.2844;
+
+                // Target date: Saturday January 17, 2026 (paintball day)
+                const targetDate = '2026-01-17';
+                const now = new Date();
+                const target = new Date(targetDate);
+                const daysUntil = Math.ceil((target - now) / (1000 * 60 * 60 * 24));
+
+                // Open-Meteo only provides ~16 days forecast, so check if target is within range
+                if (daysUntil > 0 && daysUntil <= 16) {
+                    // Fetch forecast for Saturday
+                    const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&daily=temperature_2m_max,temperature_2m_min,weather_code&timezone=Europe%2FParis&start_date=${targetDate}&end_date=${targetDate}`;
+
+                    fetch(url)
+                        .then(r => r.json())
+                        .then(data => {
+                            if (data.daily && data.daily.temperature_2m_max) {
+                                const tempMax = Math.round(data.daily.temperature_2m_max[0]);
+                                const tempMin = Math.round(data.daily.temperature_2m_min[0]);
+                                const code = data.daily.weather_code[0];
+                                const desc = this.getWeatherDesc(code);
+                                const el = document.getElementById('weather-widget');
+                                if (el) {
+                                    el.innerHTML = `📅 Sam. 17 : ${tempMin}°/${tempMax}°C • ${desc}`;
+                                }
+                            } else {
+                                this.fetchCurrentWeather();
+                            }
+                        })
+                        .catch(() => this.fetchCurrentWeather());
+                } else if (daysUntil <= 0) {
+                    // Event has passed or is today, show current weather
+                    this.fetchCurrentWeather();
+                } else {
+                    // Too far in future, show placeholder
+                    const el = document.getElementById('weather-widget');
+                    if (el) {
+                        el.innerHTML = `📅 Prévisions dispo ~2 sem avant`;
+                    }
+                }
+            },
+
+            fetchCurrentWeather() {
                 const lat = 46.9377;
                 const lon = -0.2844;
                 const url = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lon}&current=temperature_2m,weather_code&timezone=Europe%2FParis`;
@@ -1745,37 +1789,66 @@
             },
 
             uploadPhoto() {
-                // Use Native Share Sheet if available
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = 'image/*';
-                input.capture = 'environment';
-                input.style.display = 'none';
-                document.body.appendChild(input);
+                // Show a modal with clear instructions
+                const driveUrl = 'https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK';
 
-                input.onchange = async (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                // Check if Web Share API with files is supported
+                const canShareFiles = navigator.canShare && navigator.canShare({ files: [new File([''], 'test.jpg', { type: 'image/jpeg' })] });
+
+                if (canShareFiles) {
+                    // Modern approach: capture photo then share
+                    const input = document.createElement('input');
+                    input.type = 'file';
+                    input.accept = 'image/*';
+                    input.capture = 'environment';
+                    input.style.display = 'none';
+                    document.body.appendChild(input);
+
+                    input.onchange = async (e) => {
+                        const file = e.target.files[0];
+                        if (file) {
                             try {
                                 await navigator.share({
                                     files: [file],
-                                    title: 'Photo EVG',
-                                    text: 'Photo souvenir pour le Drive !'
+                                    title: 'Photo EVG Arthur',
+                                    text: 'Envoie cette photo sur le Drive !'
                                 });
                             } catch (err) {
-                                console.log('Share canceled or failed', err);
+                                if (err.name !== 'AbortError') {
+                                    window.open(driveUrl, '_blank');
+                                }
                             }
-                        } else {
-                            // Fallback
-                            alert("Partage natif non supporté. Redirection vers le Drive...");
-                            window.open('https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK', '_blank');
                         }
-                    }
-                    document.body.removeChild(input);
-                };
+                        document.body.removeChild(input);
+                    };
 
-                setTimeout(() => input.click(), 0);
+                    setTimeout(() => input.click(), 0);
+                } else {
+                    // Fallback: Show modal with instructions
+                    document.getElementById('modal-title').innerHTML = '📷 Ajouter une Photo';
+                    document.getElementById('modal-content').innerHTML = `
+                        <div style="text-align: center;">
+                            <p style="margin-bottom: 20px; font-size: 16px; line-height: 1.6;">
+                                Pour partager tes photos de l'EVG, c'est simple :
+                            </p>
+                            
+                            <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; text-align: left; margin-bottom: 20px;">
+                                <p style="margin-bottom: 12px;"><strong style="color: var(--gold);">1.</strong> Clique sur le bouton ci-dessous</p>
+                                <p style="margin-bottom: 12px;"><strong style="color: var(--gold);">2.</strong> Le Drive Google s'ouvre</p>
+                                <p style="margin-bottom: 0;"><strong style="color: var(--gold);">3.</strong> Appuie sur le <strong>+</strong> puis "Importer"</p>
+                            </div>
+                            
+                            <a href="${driveUrl}" target="_blank" class="btn btn-gold" style="width: 100%; justify-content: center; font-size: 16px; padding: 14px;">
+                                📁 Ouvrir le Drive EVG
+                            </a>
+                            
+                            <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
+                                💡 Sur mobile, tu peux prendre une photo directement depuis le Drive !
+                            </p>
+                        </div>
+                    `;
+                    document.getElementById('modal').classList.add('open');
+                }
             },
 
             // Countdown Logic
@@ -1816,7 +1889,7 @@
                             "Ici, vos mots seront scellés et révélés au Roi Ardur, un par un, chaque semaine après son retour... <br><strong>(À remplir à la fin du séjour !)</strong>"
                         </p>
 
-                        <form onsubmit="event.preventDefault(); alert('Fonctionnalité en cours de réparation...');" style="display: flex; flex-direction: column; gap: 16px;">
+                        <form onsubmit="event.preventDefault(); app.submitGuestbook(this);" style="display: flex; flex-direction: column; gap: 16px;">
                             <div>
                                 <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Titre du Parchemin</label>
                                 <input type="text" name="title" required placeholder="Ex: Souvenir du Gouffre de Helm..." 
@@ -1851,8 +1924,8 @@
                 };
 
                 // SUPABASE INSERT
-                if (supabase) {
-                    const { error } = await supabase
+                if (supabaseClient) {
+                    const { error } = await supabaseClient
                         .from('guestbook')
                         .insert([data]);
 
@@ -1967,8 +2040,8 @@
                                 <h4>QG - Airbnb</h4>
                                 <p>${DATA.airbnb.address}</p>
                                 <!-- Weather Widget -->
-                                <div id="weather-widget" style="font-size: 13px; color: var(--gold); margin-top: 4px; display: flex; align-items: center; gap: 6px; font-family: 'Patrick Hand', cursive;">
-                                    <span class="pulse" style="width: 6px; height: 6px; background: var(--text-muted); border-radius: 50%;"></span> Chargement météo...
+                                <div id="weather-widget" style="font-size: var(--text-sm); color: var(--gold); margin-top: 8px; display: flex; align-items: center; gap: 8px; font-family: 'Crimson Text', serif; font-weight: 600; font-style: italic;">
+                                    <span class="pulse" style="width: 6px; height: 6px; background: var(--gold); border-radius: 50%;"></span> Chargement météo...
                                 </div>
                             </div>
                         </div>
@@ -1980,9 +2053,9 @@
 
                     <!-- Action Buttons: Upload & Drive -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
-                        <button onclick="app.uploadPhoto()" class="btn" style="background: var(--bg-card); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto;">
-                            <span style="font-size: 24px; margin-bottom: 4px;">📷</span>
-                            <span>Ajouter Photo</span>
+                        <button onclick="app.uploadPhoto()" class="btn" style="background: linear-gradient(135deg, var(--gold-dim), var(--bg-card)); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto; font-weight: var(--weight-semibold);">
+                            <span style="font-size: 28px; margin-bottom: 6px;">📷</span>
+                            <span style="font-size: var(--text-base);">Ajouter Photo</span>
                         </button>
                         <a href="https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK" target="_blank" class="btn" style="background: var(--bg-card); border-color: var(--text-muted); color: var(--text-secondary); flex-direction: column; padding: 16px; height: auto;">
                             <span style="font-size: 24px; margin-bottom: 4px;">📁</span>
