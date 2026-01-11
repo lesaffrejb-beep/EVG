@@ -131,6 +131,16 @@
         }
 
         /* Typography - Cinzel for Headers */
+        #embers-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1;
+        }
+
         /* Typography - Cinzel for Headers */
         h1,
         h2,
@@ -1445,11 +1455,7 @@
                 });
             },
 
-            bindNav() {
-                // ... (restored below in render or explicit bind)
-            },
-
-            bindNav() {
+            attachListeners() {
                 document.querySelectorAll('.nav-btn').forEach(btn => {
                     btn.addEventListener('click', () => {
                         this.currentView = btn.dataset.view;
@@ -1458,6 +1464,10 @@
                         this.render();
                     });
                 });
+            },
+
+            checkScroll() {
+                // Placeholder for scroll logic
             },
 
             // Helper to get real Date objects for events
