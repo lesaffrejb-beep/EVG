@@ -1932,39 +1932,61 @@
             },
 
             handlePhotoSelect(event) {
+                console.log('📸 [DEBUG] handlePhotoSelect called', event);
                 const file = event.target.files[0];
-                if (!file) return;
+                console.log('📸 [DEBUG] File selected:', file ? file.name : 'NO FILE');
+
+                if (!file) {
+                    console.warn('📸 [DEBUG] No file selected, aborting');
+                    return;
+                }
 
                 // Validate file type
                 const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic'];
+                console.log('📸 [DEBUG] File type:', file.type);
+
                 if (!allowedTypes.includes(file.type.toLowerCase())) {
+                    console.error('📸 [DEBUG] Invalid file type:', file.type);
                     this.showUploadStatus('error', '❌ Type de fichier non autorisé. Utilisez uniquement des images.');
                     return;
                 }
 
                 // Validate file size (10MB)
+                console.log('📸 [DEBUG] File size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+
                 if (file.size > 10 * 1024 * 1024) {
+                    console.error('📸 [DEBUG] File too large:', file.size);
                     this.showUploadStatus('error', '❌ Fichier trop volumineux. Maximum 10MB.');
                     return;
                 }
 
+                console.log('📸 [DEBUG] File validation passed, showing preview...');
+
                 // Show preview
                 const reader = new FileReader();
                 reader.onload = (e) => {
+                    console.log('📸 [DEBUG] FileReader loaded, setting preview image');
                     const previewImg = document.getElementById('photo-preview-img');
                     const previewContainer = document.getElementById('photo-preview');
                     if (previewImg && previewContainer) {
                         previewImg.src = e.target.result;
                         previewContainer.classList.add('visible');
+                        console.log('📸 [DEBUG] Preview shown successfully');
+                    } else {
+                        console.error('📸 [DEBUG] Preview elements not found!', { previewImg, previewContainer });
                     }
                 };
                 reader.readAsDataURL(file);
 
+                console.log('📸 [DEBUG] Starting upload...');
                 // Upload file
                 this.uploadPhoto(file);
             },
 
             async uploadPhoto(file) {
+                console.log('📤 [DEBUG] uploadPhoto called with file:', file.name);
+                console.log('📤 [DEBUG] File size:', (file.size / 1024 / 1024).toFixed(2), 'MB');
+
                 const progressContainer = document.getElementById('photo-progress');
                 const progressFill = document.getElementById('photo-progress-fill');
                 const progressPercent = document.getElementById('photo-progress-percent');
@@ -1998,16 +2020,20 @@
                     }, 200);
 
                     // Upload to API
+                    console.log('📤 [DEBUG] Sending POST to /api/upload');
                     const response = await fetch('/api/upload', {
                         method: 'POST',
                         body: formData
                     });
 
                     clearInterval(progressInterval);
+                    console.log('📤 [DEBUG] API response status:', response.status, response.statusText);
 
                     const result = await response.json();
+                    console.log('📤 [DEBUG] API response data:', result);
 
                     if (response.ok && result.success) {
+                        console.log('✅ [DEBUG] Upload successful!');
                         // Complete progress
                         if (progressFill) progressFill.style.width = '100%';
                         if (progressPercent) progressPercent.textContent = '100%';
@@ -2038,7 +2064,7 @@
                         throw new Error(result.error || 'Upload failed');
                     }
                 } catch (error) {
-                    console.error('Upload error:', error);
+                    console.error('❌ [DEBUG] Upload error:', error.message, error);
                     if (progressContainer) progressContainer.classList.remove('visible');
                     this.showUploadStatus('error', '❌ Erreur lors de l\'envoi. Réessaye dans quelques instants.');
                 }
@@ -2254,7 +2280,7 @@
 
                     <!-- Action Buttons: Upload & Drive -->
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 12px;">
-                        <button onclick="app.uploadPhoto()" class="btn" style="background: linear-gradient(135deg, var(--gold-dim), var(--bg-card)); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto; font-weight: var(--weight-semibold);">
+                        <button onclick="app.currentView = 'satchel'; app.render(); setTimeout(() => app.toggleSection('photos'), 100);" class="btn" style="background: linear-gradient(135deg, var(--gold-dim), var(--bg-card)); border-color: var(--gold); color: var(--gold); flex-direction: column; padding: 16px; height: auto; font-weight: var(--weight-semibold);">
                             <span style="font-size: 28px; margin-bottom: 6px;">📷</span>
                             <span style="font-size: var(--text-base);">Ajouter Photo</span>
                         </button>
@@ -2470,7 +2496,7 @@
                     </div>
 
                     <!-- Photos -->
-                    <div class="satchel-section card ${this.photosExpanded ? 'expanded' : ''}" data-section="photos">
+                    <div class="satchel-section card ${photosExpanded ? 'expanded' : ''}" data-section="photos">
                         <div class="satchel-header" onclick="app.toggleSection('photos')">
                             <div class="satchel-header-left">
                                 <span class="satchel-icon">📸</span>
