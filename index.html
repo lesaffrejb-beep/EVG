@@ -1483,9 +1483,18 @@
         // ============================================
 
         // SUPABASE CLIENT
-        const supabaseUrl = 'https://puhgwvbxlrdpuyczsnzm.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1aGd3dmJ4bHJkcHV5Y3pzbnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNDI3MzYsImV4cCI6MjA4MzcxODczNn0.RARI56JSAsvXviMsVfpQF_aoiFiGxTn0n8ZZAbGNaB4';
-        const supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+        let supabase = null;
+        try {
+            const supabaseUrl = 'https://puhgwvbxlrdpuyczsnzm.supabase.co';
+            const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1aGd3dmJ4bHJkcHV5Y3pzbnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNDI3MzYsImV4cCI6MjA4MzcxODczNn0.RARI56JSAsvXviMsVfpQF_aoiFiGxTn0n8ZZAbGNaB4';
+            if (window.supabase) {
+                supabase = window.supabase.createClient(supabaseUrl, supabaseKey);
+            } else {
+                console.warn("Supabase library not found in window");
+            }
+        } catch (err) {
+            console.error("Supabase Init Error:", err);
+        }
 
         const app = {
             currentView: 'campfire',
@@ -2220,9 +2229,18 @@
         };
 
         // Initialize App and Embers
+        // Initialize App and Embers
         document.addEventListener('DOMContentLoaded', () => {
-            new Embers();
-            app.init();
+            try {
+                new Embers();
+                app.init();
+            } catch (e) {
+                console.error("CRITICAL APP ERROR:", e);
+                document.body.innerHTML += `<div style="position:fixed; top:0; left:0; width:100%; background:red; color:white; padding:20px; z-index:9999; font-size:20px;">
+                    CRASH DETECTED: ${e.message} <br>
+                    <small>${e.stack}</small>
+                </div>`;
+            }
         });
     </script>
 </body>
