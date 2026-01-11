@@ -1480,6 +1480,12 @@
         // ============================================
         // APP INITIALIZATION
         // ============================================
+
+        // SUPABASE CLIENT
+        const supabaseUrl = 'https://puhgwvbxlrdpuyczsnzm.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB1aGd3dmJ4bHJkcHV5Y3pzbnptIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjgxNDI3MzYsImV4cCI6MjA4MzcxODczNn0.RARI56JSAsvXviMsVfpQF_aoiFiGxTn0n8ZZAbGNaB4';
+        const supabase = window.supabase ? window.supabase.createClient(supabaseUrl, supabaseKey) : null;
+
         const app = {
             currentView: 'campfire',
             expandedSections: new Set(['rules']),
@@ -1801,7 +1807,7 @@
 
                     <div class="card" style="padding: 24px;">
                         <p class="handwritten" style="margin-bottom: 20px; text-align: center;">
-                            "Ici, vos mots seront scellés et révélés au Roi Ardur, un par un, chaque semaine après son retour..."
+                            "Ici, vos mots seront scellés et révélés au Roi Ardur, un par un, chaque semaine après son retour... <br><strong>(À remplir à la fin du séjour !)</strong>"
                         </p>
 
                         <form onsubmit="event.preventDefault(); app.submitGuestbook(this);" style="display: flex; flex-direction: column; gap: 16px;">
