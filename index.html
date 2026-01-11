@@ -541,6 +541,11 @@
         /* Satchel (Guide) - Accordion */
         .satchel-section {
             margin-bottom: 10px;
+            transform: translateZ(0);
+            -webkit-backface-visibility: hidden;
+            backface-visibility: hidden;
+            will-change: grid-template-rows;
+            /* Optimization hint */
         }
 
         .satchel-header {
@@ -1311,15 +1316,17 @@
             getAllEvents() {
                 const year = 2026;
                 const month = 0; // Jan
-                const dayMap = {
-                    "VENDREDI 16 JANVIER": 16,
-                    "SAMEDI 17 JANVIER": 17,
-                    "DIMANCHE 18 JANVIER": 18
+                // Robust mapping: check if string contains the day number
+                const getDayNum = (str) => {
+                    if (str.includes('16')) return 16;
+                    if (str.includes('17')) return 17;
+                    if (str.includes('18')) return 18;
+                    return 16; // default fallback
                 };
 
                 const events = [];
                 DATA.schedule.forEach(dayGrp => {
-                    const dayNum = dayMap[dayGrp.day];
+                    const dayNum = getDayNum(dayGrp.day);
                     dayGrp.events.forEach(ev => {
                         let h = 8, m = 0; // Default morning
                         const t = ev.time.toLowerCase().replace('~', '').trim();
@@ -1335,7 +1342,10 @@
                         }
 
                         const date = new Date(year, month, dayNum, h, m);
-                        events.push({ ...ev, date });
+                        // Filter out invalid dates
+                        if (!isNaN(date.getTime())) {
+                            events.push({ ...ev, date });
+                        }
                     });
                 });
                 return events.sort((a, b) => a.date - b.date);
