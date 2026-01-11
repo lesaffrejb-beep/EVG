@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="fr">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>EVG Arthur - 16-18 Janvier 2026</title>
+    <meta name="description" content="Programme officiel de l'EVG d'Arthur">
+    <meta name="theme-color" content="#0a0a0a">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        :root {
+            --bg: #09090b;
+            --bg-card: #18181b;
+            --bg-elevated: #27272a;
+            --border: rgba(255, 255, 255, 0.08);
+            --border-hover: rgba(255, 255, 255, 0.15);
+            --glow: #f59e0b;
+            --glow-dim: rgba(245, 158, 11, 0.12);
+            --glow-bright: #fbbf24;
+            --text: #fafafa;
+            --text-secondary: #a1a1aa;
+            --text-muted: #71717a;
+            --success: #22c55e;
+            --radius: 16px;
+            --radius-sm: 12px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            min-height: 100dvh;
+            overflow-x: hidden;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* Subtle animated gradient */
+        .bg-glow {
+            position: fixed;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle at 30% 20%, rgba(245, 158, 11, 0.06) 0%, transparent 50%),
+                radial-gradient(circle at 70% 80%, rgba(234, 88, 12, 0.04) 0%, transparent 50%);
+            animation: bgFloat 25s ease-in-out infinite;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @keyframes bgFloat {
+
+            0%,
+            100% {
+                transform: translate(0, 0);
+            }
+
+            50% {
+                transform: translate(-3%, 3%);
+            }
+        }
+
+        /* Confetti */
+        .confetti {
+            position: fixed;
+            width: 6px;
+            height: 6px;
+            border-radius: 2px;
+            opacity: 0.5;
+            animation: confettiFall linear infinite;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        @keyframes confettiFall {
+            0% {
+                transform: translateY(-100vh) rotate(0deg);
+                opacity: 0;
+            }
+
+            10% {
+                opacity: 0.5;
+            }
+
+            90% {
+                opacity: 0.5;
+            }
+
+            100% {
+                transform: translateY(100vh) rotate(720deg);
+                opacity: 0;
+            }
+        }
+
+        /* Bento Card */
+        .card {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            transition: all 0.2s ease;
+        }
+
+        .card:hover,
+        .card:active {
+            border-color: var(--border-hover);
+            background: var(--bg-elevated);
+        }
+
+        .card-glow:hover {
+            box-shadow: 0 0 24px var(--glow-dim);
+        }
+
+        /* App container */
+        .app {
+            position: relative;
+            z-index: 10;
+            max-width: 480px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 100px;
+        }
+
+        /* Header */
+        .header {
+            text-align: center;
+            padding: 16px 0 24px;
+        }
+
+        .header-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--glow-dim);
+            color: var(--glow);
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 0.5px;
+            text-transform: uppercase;
+            padding: 6px 12px;
+            border-radius: 20px;
+            margin-bottom: 12px;
+        }
+
+        .header-title {
+            font-size: 28px;
+            font-weight: 800;
+            letter-spacing: -0.5px;
+        }
+
+        .header-sub {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 4px;
+        }
+
+        /* Countdown */
+        .countdown {
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            text-align: center;
+        }
+
+        .countdown-label {
+            font-size: 11px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 16px;
+        }
+
+        .countdown-grid {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+        }
+
+        .countdown-item {
+            text-align: center;
+        }
+
+        .countdown-num {
+            font-size: 40px;
+            font-weight: 900;
+            line-height: 1;
+            background: linear-gradient(135deg, var(--glow-bright), var(--glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .countdown-unit {
+            font-size: 10px;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-top: 6px;
+        }
+
+        /* Current Activity (when event started) */
+        .current-activity {
+            padding: 20px;
+            margin-bottom: 16px;
+            background: linear-gradient(135deg, var(--glow-dim), transparent);
+            border-color: var(--glow);
+        }
+
+        .current-activity-label {
+            font-size: 10px;
+            color: var(--glow);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            margin-bottom: 8px;
+        }
+
+        .current-activity-title {
+            font-size: 20px;
+            font-weight: 700;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        /* Quick Cards */
+        .quick-card {
+            padding: 16px;
+            margin-bottom: 10px;
+            cursor: pointer;
+            min-height: 44px;
+        }
+
+        .quick-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+
+        .quick-icon {
+            width: 44px;
+            height: 44px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 12px;
+            font-size: 22px;
+            background: var(--bg-elevated);
+            flex-shrink: 0;
+        }
+
+        .quick-icon-glow {
+            background: var(--glow-dim);
+        }
+
+        .quick-content h3 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+        }
+
+        .quick-content p {
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .quick-arrow {
+            margin-left: auto;
+            color: var(--text-muted);
+            font-size: 16px;
+        }
+
+        /* Alert - Compact */
+        .alert-compact {
+            padding: 14px 16px;
+            margin: 16px 0;
+            border-left: 3px solid var(--glow);
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+        }
+
+        .alert-compact strong {
+            color: var(--text);
+        }
+
+        /* Copy Button */
+        .copy-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: var(--bg-elevated);
+            color: var(--text-secondary);
+            font-size: 12px;
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .copy-btn:hover {
+            background: var(--glow-dim);
+            color: var(--glow);
+            border-color: var(--glow);
+        }
+
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--success);
+            border-color: var(--success);
+        }
+
+        /* Button Primary */
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: linear-gradient(135deg, var(--glow), #ea580c);
+            color: #000;
+            font-size: 13px;
+            font-weight: 600;
+            padding: 12px 20px;
+            border-radius: 10px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            min-height: 44px;
+        }
+
+        .btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 24px var(--glow-dim);
+        }
+
+        /* Timeline */
+        .timeline-day {
+            margin-bottom: 20px;
+        }
+
+        .timeline-day-header {
+            display: inline-block;
+            background: linear-gradient(135deg, var(--glow), #ea580c);
+            color: #000;
+            font-size: 11px;
+            font-weight: 700;
+            padding: 6px 14px;
+            border-radius: 16px;
+            margin-bottom: 12px;
+        }
+
+        .timeline-event {
+            padding: 14px 16px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            position: relative;
+            min-height: 44px;
+        }
+
+        .timeline-event.highlight {
+            border-color: var(--glow);
+            background: linear-gradient(135deg, var(--glow-dim), transparent);
+        }
+
+        .timeline-event.highlight::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 3px;
+            height: 100%;
+            background: var(--glow);
+            border-radius: 3px 0 0 3px;
+        }
+
+        .timeline-event.has-modal::after {
+            content: '📖';
+            position: absolute;
+            top: 14px;
+            right: 14px;
+            font-size: 14px;
+            opacity: 0.6;
+        }
+
+        .timeline-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 6px;
+        }
+
+        .timeline-title {
+            font-size: 14px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .timeline-time {
+            font-size: 11px;
+            font-family: 'SF Mono', monospace;
+            color: var(--glow);
+            background: var(--glow-dim);
+            padding: 3px 8px;
+            border-radius: 6px;
+            flex-shrink: 0;
+        }
+
+        .timeline-desc {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.4;
+        }
+
+        /* Modal / Bottom Sheet */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(4px);
+            z-index: 200;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .modal-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .modal-sheet {
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-bottom: none;
+            border-radius: 20px 20px 0 0;
+            width: 100%;
+            max-width: 480px;
+            max-height: 80vh;
+            overflow-y: auto;
+            transform: translateY(100%);
+            transition: transform 0.3s ease;
+            padding: 24px 20px;
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+        }
+
+        .modal-overlay.open .modal-sheet {
+            transform: translateY(0);
+        }
+
+        .modal-handle {
+            width: 40px;
+            height: 4px;
+            background: var(--text-muted);
+            border-radius: 2px;
+            margin: 0 auto 20px;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 700;
+            margin-bottom: 16px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .modal-content {
+            font-size: 13px;
+            color: var(--text-secondary);
+            line-height: 1.7;
+        }
+
+        .modal-content ol {
+            padding-left: 20px;
+            margin: 12px 0;
+        }
+
+        .modal-content strong {
+            color: var(--glow);
+        }
+
+        /* Budget */
+        .budget-total {
+            text-align: center;
+            padding: 20px;
+            margin-bottom: 12px;
+        }
+
+        .budget-amount {
+            font-size: 48px;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--glow-bright), var(--glow));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .budget-label {
+            color: var(--text-secondary);
+            font-size: 13px;
+            margin-top: 4px;
+        }
+
+        .chart-wrap {
+            height: 180px;
+            margin: 16px 0;
+        }
+
+        .budget-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .budget-item:last-child {
+            border: none;
+        }
+
+        .budget-item-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .budget-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+        }
+
+        .budget-item-name {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .budget-item-value {
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        /* Paintball Card */
+        .paintball-card {
+            padding: 20px;
+            background: linear-gradient(135deg, var(--glow-dim), transparent);
+            border-color: var(--glow);
+            margin-bottom: 20px;
+        }
+
+        .paintball-header {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            margin-bottom: 14px;
+        }
+
+        .paintball-icon {
+            font-size: 36px;
+        }
+
+        .paintball-title {
+            font-size: 20px;
+            font-weight: 800;
+        }
+
+        .paintball-sub {
+            color: var(--text-secondary);
+            font-size: 12px;
+        }
+
+        .paintball-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .paintball-stat {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 10px 8px;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .paintball-stat-value {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--glow);
+        }
+
+        .paintball-stat-label {
+            font-size: 9px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            margin-top: 2px;
+        }
+
+        /* Games with Score Counter */
+        .game-card {
+            padding: 16px;
+            margin-bottom: 10px;
+        }
+
+        .game-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .game-icon {
+            font-size: 24px;
+        }
+
+        .game-title {
+            font-size: 14px;
+            font-weight: 700;
+        }
+
+        .game-rules {
+            font-size: 12px;
+            color: var(--text-secondary);
+            line-height: 1.5;
+            margin-bottom: 12px;
+        }
+
+        .game-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .game-points {
+            font-size: 11px;
+            color: var(--glow);
+            background: var(--glow-dim);
+            padding: 5px 10px;
+            border-radius: 6px;
+        }
+
+        .score-counter {
+            display: flex;
+            gap: 4px;
+        }
+
+        .score-team {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            background: var(--bg-elevated);
+            border-radius: 8px;
+            padding: 4px;
+        }
+
+        .score-team-label {
+            font-size: 10px;
+            color: var(--text-muted);
+            padding: 0 6px;
+        }
+
+        .score-btn {
+            width: 28px;
+            height: 28px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            color: var(--text);
+            font-size: 14px;
+            cursor: pointer;
+            transition: all 0.15s;
+            min-height: 44px;
+            min-width: 44px;
+        }
+
+        .score-btn:active {
+            background: var(--glow-dim);
+            border-color: var(--glow);
+        }
+
+        .score-value {
+            min-width: 24px;
+            text-align: center;
+            font-weight: 700;
+            font-size: 14px;
+        }
+
+        /* Checklist */
+        .check-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 16px;
+            margin-bottom: 6px;
+            cursor: pointer;
+            transition: all 0.2s;
+            min-height: 44px;
+        }
+
+        .check-item.checked {
+            opacity: 0.5;
+        }
+
+        .check-box {
+            width: 22px;
+            height: 22px;
+            border-radius: 6px;
+            border: 2px solid var(--text-muted);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+            flex-shrink: 0;
+            font-size: 12px;
+            color: transparent;
+        }
+
+        .check-item.checked .check-box {
+            background: var(--glow);
+            border-color: var(--glow);
+            color: #000;
+        }
+
+        .check-text {
+            font-size: 13px;
+        }
+
+        .check-item.checked .check-text {
+            text-decoration: line-through;
+            color: var(--text-muted);
+        }
+
+        /* Location */
+        .location-card {
+            padding: 16px;
+        }
+
+        .location-title {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 6px;
+        }
+
+        .location-address {
+            color: var(--text-secondary);
+            font-size: 12px;
+            margin-bottom: 12px;
+        }
+
+        .location-distances {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 14px;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        /* Bottom Nav - Standardized */
+        .nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: 10px 16px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+        }
+
+        .nav-inner {
+            max-width: 420px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-around;
+            background: rgba(24, 24, 27, 0.92);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 6px;
+        }
+
+        .nav-btn {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 3px;
+            padding: 8px 4px;
+            background: none;
+            border: none;
+            color: var(--text-muted);
+            font-size: 9px;
+            font-weight: 500;
+            cursor: pointer;
+            border-radius: 12px;
+            transition: all 0.2s;
+            min-height: 44px;
+        }
+
+        .nav-btn span {
+            font-size: 18px;
+            transition: transform 0.2s;
+        }
+
+        .nav-btn.active {
+            color: var(--glow);
+            background: var(--glow-dim);
+        }
+
+        .nav-btn.active span {
+            transform: scale(1.1);
+        }
+
+        /* Animations */
+        .fade-in {
+            animation: fadeIn 0.3s ease;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(16px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+        }
+
+        .view {
+            display: none;
+        }
+
+        .view.active {
+            display: block;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="bg-glow"></div>
+    <div id="confetti-container"></div>
+    <div class="app" id="app"></div>
+
+    <!-- Modal -->
+    <div class="modal-overlay" id="modal" onclick="app.closeModal(event)">
+        <div class="modal-sheet" onclick="event.stopPropagation()">
+            <div class="modal-handle"></div>
+            <div class="modal-title" id="modal-title"></div>
+            <div class="modal-content" id="modal-content"></div>
+        </div>
+    </div>
+
+    <!-- Bottom Nav -->
+    <nav class="nav">
+        <div class="nav-inner">
+            <button class="nav-btn active" data-view="home"><span>🏠</span>Home</button>
+            <button class="nav-btn" data-view="planning"><span>📅</span>Planning</button>
+            <button class="nav-btn" data-view="games"><span>🏆</span>Activités</button>
+            <button class="nav-btn" data-view="budget"><span>💰</span>Budget</button>
+            <button class="nav-btn" data-view="logistics"><span>🎒</span>Logistique</button>
+        </div>
+    </nav>
+
+    <script>
+        const DATA = {
+            eventStart: new Date('2026-01-16T18:01:00'),
+            eventEnd: new Date('2026-01-18T14:00:00'),
+            budget: {
+                total: 1795,
+                perPerson: 180,
+                items: [
+                    { label: 'Logement', value: 755, color: '#a1a1aa' },
+                    { label: 'Alimentation', value: 400, color: '#f59e0b' },
+                    { label: 'Alcool', value: 360, color: '#ea580c' },
+                    { label: 'Paintball', value: 300, color: '#71717a' }
+                ]
+            },
+            checklist: [
+                { id: 1, text: "Animation 'Spécial Arthur' (15-20 min)" },
+                { id: 2, text: "Tenue de sport (footing + paintball)" },
+                { id: 3, text: "Chaussures de sport / trail" },
+                { id: 4, text: "Tenue qui craint rien (paintball)" },
+                { id: 5, text: "Photos uploadées sur le Drive" },
+                { id: 6, text: "Accessoires animations" },
+                { id: 7, text: "Doliprane & Citrate de Bétaïne 💊" }
+            ],
+            recipes: {
+                tacos: {
+                    title: "🌮 Tacos 'Méthode Four'",
+                    content: `<ol>
+                    <li>Cuire la viande avec épices (sachets Old El Paso ou cumin/paprika)</li>
+                    <li>Disposer les tortillas sur les grilles du four (avec papier cuisson)</li>
+                    <li>Mettre la viande et le <strong>fromage au centre</strong></li>
+                    <li>Enfourner <strong>5 min à 200°C</strong> (ou sous le grill)</li>
+                    <li>Sortir, ajouter salade, tomates, sauce et plier !</li>
+                </ol>
+                <p style="margin-top:12px;"><strong>⚠️ Attention aux plombs</strong> si friteuse + four en même temps !</p>`
+                },
+                gnocchis: {
+                    title: "🍝 Gnocchis 'Crousti-Fondants'",
+                    content: `<ol>
+                    <li><strong>PAS D'EAU !</strong> Ne jamais faire bouillir les gnocchis</li>
+                    <li>Grande poêle : beurre + huile d'olive, feu moyen/vif</li>
+                    <li>Gnocchis directs du paquet, dorer <strong>5-7 min</strong> en remuant</li>
+                    <li>Baisser le feu, ajouter la sauce (pesto/tomate/crème)</li>
+                    <li>Remuer 1 min, servir avec fromage râpé</li>
+                </ol>
+                <p style="margin-top:12px;">💡 Faire en 2 tournées avec 2 grandes poêles pour 10 personnes.</p>`
+                }
+            },
+            schedule: [
+                {
+                    day: "VENDREDI 16",
+                    events: [
+                        { time: "18h01", icon: "🕵️", title: "Kidnapping", details: "2 rue Voltaire, Angers", highlight: true },
+                        { time: "~19h30", icon: "🏡", title: "Installation Airbnb", details: "Setup sono/lumière/fumée" },
+                        { time: "20h00", icon: "🥂", title: "Apéro & Diapo", details: "300 photos en boucle" },
+                        { time: "21h00", icon: "🎭", title: "Recette Pompette", details: "Animations 15-20 min chacun" },
+                        { time: "22h30", icon: "🌮", title: "Dîner Chef Pierre", details: "Tacos + Frites maison", recipe: "tacos" },
+                        { time: "00h00", icon: "💃", title: "Boîte Maison", details: "Playlist 2000 + Rap 2025" }
+                    ]
+                },
+                {
+                    day: "SAMEDI 17",
+                    events: [
+                        { time: "Matin", icon: "🏃", title: "Footing optionnel", details: "5km max 3:45/km" },
+                        { time: "11h00", icon: "🛒", title: "Marché Saumur", details: "2 voitures, courses fraîches" },
+                        { time: "12h30", icon: "🥓", title: "Brunch Royal", details: "Produits du marché" },
+                        { time: "14h30", icon: "🔫", title: "Paintball 79", details: "Rigné • 9 joueurs • 2h", highlight: true },
+                        { time: "18h00", icon: "🏆", title: "Olympiades", details: "Team A vs Team B" },
+                        { time: "21h00", icon: "💍", title: "Soirée SDA", details: "Gnocchis + Marathon LOTR", recipe: "gnocchis" }
+                    ]
+                },
+                {
+                    day: "DIMANCHE 18",
+                    events: [
+                        { time: "Matin", icon: "🥖", title: "Brunch léger", details: "Restes + café" },
+                        { time: "Midi", icon: "🧹", title: "Rangement", details: "Nettoyage Airbnb" },
+                        { time: "Aprem", icon: "🚗", title: "Retour", details: "Fin de l'aventure" }
+                    ]
+                }
+            ],
+            games: [
+                { id: 'duathlon', icon: "🎱", title: "Duathlon de Bar", rules: "Baby-foot (3 matchs) + Billard (3 parties). Pas de pissette.", points: "1 pt/match" },
+                { id: 'beerpong', icon: "🍺", title: "Beer Pong", rules: "10 gobelets. Arthur met une balle → tout le monde boit !", points: "5 pts victoire" },
+                { id: 'blindtest', icon: "🎵", title: "Blind Test", rules: "Pop/Rock 2000 + Rap 2025 + 3 génériques TV.", points: "1 pt/réponse" },
+                { id: 'quiz', icon: "🧠", title: "Le Grand Quiz", rules: "Géo, L'Histoire du Sage, Les Dossiers, Culture G.", points: "2 pts/réponse" }
+            ],
+            scores: { teamA: {}, teamB: {} }
+        };
+
+        // Load state
+        const savedChecks = JSON.parse(localStorage.getItem('evg-checks') || '{}');
+        DATA.checklist.forEach(item => item.checked = savedChecks[item.id] || false);
+        DATA.scores = JSON.parse(localStorage.getItem('evg-scores') || '{"teamA":{},"teamB":{}}');
+
+        const app = {
+            currentView: 'home',
+            chart: null,
+
+            init() {
+                this.createConfetti();
+                this.bindNav();
+                this.render();
+                setInterval(() => this.updateCountdown(), 1000);
+            },
+
+            createConfetti() {
+                const container = document.getElementById('confetti-container');
+                const colors = ['#f59e0b', '#fbbf24', '#ea580c', '#fff'];
+                for (let i = 0; i < 12; i++) {
+                    const c = document.createElement('div');
+                    c.className = 'confetti';
+                    c.style.left = Math.random() * 100 + '%';
+                    c.style.background = colors[Math.floor(Math.random() * colors.length)];
+                    c.style.animationDuration = (18 + Math.random() * 25) + 's';
+                    c.style.animationDelay = (Math.random() * 25) + 's';
+                    container.appendChild(c);
+                }
+            },
+
+            bindNav() {
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        this.currentView = btn.dataset.view;
+                        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.render();
+                    });
+                });
+            },
+
+            isEventStarted() {
+                return new Date() >= DATA.eventStart;
+            },
+
+            isEventEnded() {
+                return new Date() >= DATA.eventEnd;
+            },
+
+            getCountdown() {
+                const diff = DATA.eventStart - new Date();
+                if (diff <= 0) return null;
+                return {
+                    d: Math.floor(diff / 86400000),
+                    h: Math.floor((diff % 86400000) / 3600000),
+                    m: Math.floor((diff % 3600000) / 60000),
+                    s: Math.floor((diff % 60000) / 1000)
+                };
+            },
+
+            getCurrentActivity() {
+                const now = new Date();
+                let current = null;
+                DATA.schedule.forEach(day => {
+                    day.events.forEach(ev => {
+                        current = ev; // Simplified: just show the latest
+                    });
+                });
+                return current;
+            },
+
+            updateCountdown() {
+                const cd = this.getCountdown();
+                const el = document.getElementById('countdown-nums');
+                if (el && cd) {
+                    el.innerHTML = `
+                    <div class="countdown-item"><div class="countdown-num">${cd.d}</div><div class="countdown-unit">jours</div></div>
+                    <div class="countdown-item"><div class="countdown-num">${cd.h}</div><div class="countdown-unit">heures</div></div>
+                    <div class="countdown-item"><div class="countdown-num">${cd.m}</div><div class="countdown-unit">min</div></div>
+                    <div class="countdown-item"><div class="countdown-num">${cd.s}</div><div class="countdown-unit">sec</div></div>
+                `;
+                }
+            },
+
+            toggleCheck(id) {
+                const item = DATA.checklist.find(i => i.id === id);
+                if (item) {
+                    item.checked = !item.checked;
+                    const saved = JSON.parse(localStorage.getItem('evg-checks') || '{}');
+                    saved[id] = item.checked;
+                    localStorage.setItem('evg-checks', JSON.stringify(saved));
+                    this.render();
+                }
+            },
+
+            updateScore(gameId, team, delta) {
+                if (!DATA.scores[team][gameId]) DATA.scores[team][gameId] = 0;
+                DATA.scores[team][gameId] = Math.max(0, DATA.scores[team][gameId] + delta);
+                localStorage.setItem('evg-scores', JSON.stringify(DATA.scores));
+                this.render();
+            },
+
+            getScore(gameId, team) {
+                return DATA.scores[team]?.[gameId] || 0;
+            },
+
+            copyAddress() {
+                navigator.clipboard.writeText('1 Clossais, Thouars 79100');
+                const btn = document.getElementById('copy-btn');
+                if (btn) {
+                    btn.classList.add('copied');
+                    btn.innerHTML = '✓ Copié !';
+                    setTimeout(() => {
+                        btn.classList.remove('copied');
+                        btn.innerHTML = '📋 Copier';
+                    }, 2000);
+                }
+            },
+
+            openRecipe(recipeKey) {
+                const recipe = DATA.recipes[recipeKey];
+                if (recipe) {
+                    document.getElementById('modal-title').innerHTML = recipe.title;
+                    document.getElementById('modal-content').innerHTML = recipe.content;
+                    document.getElementById('modal').classList.add('open');
+                }
+            },
+
+            closeModal(e) {
+                if (e.target.id === 'modal') {
+                    document.getElementById('modal').classList.remove('open');
+                }
+            },
+
+            navigate(view) {
+                this.currentView = view;
+                document.querySelectorAll('.nav-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.view === view);
+                });
+                this.render();
+            },
+
+            render() {
+                const el = document.getElementById('app');
+                el.innerHTML = '';
+                el.classList.remove('fade-in');
+                void el.offsetWidth;
+                el.classList.add('fade-in');
+
+                switch (this.currentView) {
+                    case 'home': this.renderHome(el); break;
+                    case 'planning': this.renderPlanning(el); break;
+                    case 'games': this.renderGames(el); break;
+                    case 'budget': this.renderBudget(el); break;
+                    case 'logistics': this.renderLogistics(el); break;
+                }
+            },
+
+            renderHome(el) {
+                const cd = this.getCountdown();
+                const eventStarted = this.isEventStarted();
+
+                let countdownOrActivity = '';
+                if (eventStarted) {
+                    const curr = this.getCurrentActivity();
+                    countdownOrActivity = `
+                    <div class="current-activity card" onclick="app.navigate('planning')">
+                        <div class="current-activity-label">🔴 Événement en cours</div>
+                        <div class="current-activity-title">${curr.icon} ${curr.title}</div>
+                    </div>
+                `;
+                } else {
+                    countdownOrActivity = `
+                    <div class="countdown card">
+                        <div class="countdown-label">⏱️ Avant le kidnapping</div>
+                        <div class="countdown-grid" id="countdown-nums">
+                            <div class="countdown-item"><div class="countdown-num">${cd.d}</div><div class="countdown-unit">jours</div></div>
+                            <div class="countdown-item"><div class="countdown-num">${cd.h}</div><div class="countdown-unit">heures</div></div>
+                            <div class="countdown-item"><div class="countdown-num">${cd.m}</div><div class="countdown-unit">min</div></div>
+                            <div class="countdown-item"><div class="countdown-num">${cd.s}</div><div class="countdown-unit">sec</div></div>
+                        </div>
+                    </div>
+                `;
+                }
+
+                el.innerHTML = `
+                <div class="header">
+                    <div class="header-badge">🍻 16-18 Janvier</div>
+                    <h1 class="header-title">EVG ARTHUR</h1>
+                    <p class="header-sub">Angers → Thouars</p>
+                </div>
+
+                ${countdownOrActivity}
+
+                <div class="quick-card card card-glow" onclick="app.navigate('planning')">
+                    <div class="quick-row">
+                        <div class="quick-icon quick-icon-glow">🕵️</div>
+                        <div class="quick-content">
+                            <h3>Kidnapping</h3>
+                            <p>Vendredi 18h01 • 2 rue Voltaire</p>
+                        </div>
+                        <div class="quick-arrow">→</div>
+                    </div>
+                </div>
+
+                <div class="quick-card card" onclick="app.navigate('logistics')">
+                    <div class="quick-row">
+                        <div class="quick-icon">🏡</div>
+                        <div class="quick-content">
+                            <h3>QG Airbnb</h3>
+                            <p>1 Clossais, Thouars</p>
+                        </div>
+                        <button class="copy-btn" id="copy-btn" onclick="event.stopPropagation(); app.copyAddress()">📋 Copier</button>
+                    </div>
+                </div>
+
+                <div class="alert-compact card">
+                    <strong>⚠️ Rappel :</strong> Prépare ton animation 15-20 min + uploade tes photos sur le Drive !
+                    <div style="margin-top:12px;">
+                        <a href="https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK" target="_blank" class="btn">📁 Accéder au Drive</a>
+                    </div>
+                </div>
+            `;
+            },
+
+            renderPlanning(el) {
+                let html = `<div class="header"><h1 class="header-title">Planning</h1><p class="header-sub">Clique sur les repas pour les recettes</p></div>`;
+
+                DATA.schedule.forEach(day => {
+                    html += `<div class="timeline-day"><div class="timeline-day-header">${day.day}</div>`;
+                    day.events.forEach(ev => {
+                        const hasRecipe = ev.recipe ? 'has-modal' : '';
+                        const onclick = ev.recipe ? `onclick="app.openRecipe('${ev.recipe}')"` : '';
+                        html += `
+                        <div class="timeline-event card ${ev.highlight ? 'highlight' : ''} ${hasRecipe}" ${onclick}>
+                            <div class="timeline-top">
+                                <div class="timeline-title">${ev.icon} ${ev.title}</div>
+                                <div class="timeline-time">${ev.time}</div>
+                            </div>
+                            <div class="timeline-desc">${ev.details}</div>
+                        </div>
+                    `;
+                    });
+                    html += `</div>`;
+                });
+
+                el.innerHTML = html;
+            },
+
+            renderGames(el) {
+                el.innerHTML = `
+                <div class="header"><h1 class="header-title">Activités</h1><p class="header-sub">Paintball + Olympiades</p></div>
+
+                <div class="paintball-card card">
+                    <div class="paintball-header">
+                        <div class="paintball-icon">🔫</div>
+                        <div>
+                            <div class="paintball-title">Paintball 79</div>
+                            <div class="paintball-sub">Rigné • Samedi 14h30</div>
+                        </div>
+                    </div>
+                    <div class="paintball-grid">
+                        <div class="paintball-stat"><div class="paintball-stat-value">9</div><div class="paintball-stat-label">Joueurs</div></div>
+                        <div class="paintball-stat"><div class="paintball-stat-value">2h</div><div class="paintball-stat-label">De jeu</div></div>
+                        <div class="paintball-stat"><div class="paintball-stat-value">200€</div><div class="paintball-stat-label">Caution ✓</div></div>
+                        <div class="paintball-stat"><div class="paintball-stat-value">30€</div><div class="paintball-stat-label">/Joueur</div></div>
+                    </div>
+                </div>
+
+                <h2 class="section-title">🏆 Olympiades</h2>
+                <div class="alert-compact card" style="margin-bottom:12px;">
+                    <strong>Format :</strong> Team A (Capitaine Arthur) vs Team B • <strong>Arbitre :</strong> JB<br>
+                    <strong>Enjeu :</strong> Perdants = vaisselle !
+                </div>
+
+                ${DATA.games.map(g => `
+                    <div class="game-card card">
+                        <div class="game-header">
+                            <span class="game-icon">${g.icon}</span>
+                            <span class="game-title">${g.title}</span>
+                        </div>
+                        <div class="game-rules">${g.rules}</div>
+                        <div class="game-footer">
+                            <div class="game-points">🎯 ${g.points}</div>
+                            <div class="score-counter">
+                                <div class="score-team">
+                                    <span class="score-team-label">A</span>
+                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamA',-1)">−</button>
+                                    <span class="score-value">${this.getScore(g.id, 'teamA')}</span>
+                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamA',1)">+</button>
+                                </div>
+                                <div class="score-team">
+                                    <span class="score-team-label">B</span>
+                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamB',-1)">−</button>
+                                    <span class="score-value">${this.getScore(g.id, 'teamB')}</span>
+                                    <button class="score-btn" onclick="app.updateScore('${g.id}','teamB',1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `).join('')}
+            `;
+            },
+
+            renderBudget(el) {
+                el.innerHTML = `
+                <div class="header"><h1 class="header-title">Budget</h1><p class="header-sub">Pour 10 personnes</p></div>
+
+                <div class="budget-total card">
+                    <div class="budget-amount">180€</div>
+                    <div class="budget-label">par personne • Total : ${DATA.budget.total}€</div>
+                </div>
+
+                <div class="card" style="padding:20px;">
+                    <div class="chart-wrap"><canvas id="chart"></canvas></div>
+                    ${DATA.budget.items.map(item => `
+                        <div class="budget-item">
+                            <div class="budget-item-left">
+                                <div class="budget-dot" style="background:${item.color}"></div>
+                                <span class="budget-item-name">${item.label}</span>
+                            </div>
+                            <span class="budget-item-value">${item.value}€</span>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+
+                setTimeout(() => {
+                    const ctx = document.getElementById('chart');
+                    if (ctx) {
+                        if (this.chart) this.chart.destroy();
+                        this.chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: DATA.budget.items.map(x => x.label),
+                                datasets: [{
+                                    data: DATA.budget.items.map(x => x.value),
+                                    backgroundColor: DATA.budget.items.map(x => x.color),
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '70%',
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                }, 100);
+            },
+
+            renderLogistics(el) {
+                el.innerHTML = `
+                <div class="header"><h1 class="header-title">Logistique</h1><p class="header-sub">Adresses & Checklist</p></div>
+
+                <div class="location-card card" style="margin-bottom:12px;">
+                    <div class="location-title">📍 QG (Airbnb)</div>
+                    <div class="location-address">1 Clossais, Thouars (79100)</div>
+                    <div class="location-distances">
+                        <span>🚗 Angers → 1h10</span>
+                        <span>🔫 Paintball → 10 min</span>
+                    </div>
+                    <a href="https://www.google.com/maps?q=46.937728,-0.284420" target="_blank" class="btn">🗺️ Ouvrir Maps</a>
+                </div>
+
+                <div class="card" style="padding:16px; margin-bottom:16px;">
+                    <div style="font-weight:600; margin-bottom:10px;">🎛️ Matos</div>
+                    <div style="font-size:12px; color:var(--text-secondary); line-height:1.7;">
+                        <strong>Jules :</strong> Son, lumière, VP<br>
+                        <strong>JB :</strong> Friteuse, ordi, HDMI, machine à fumée
+                    </div>
+                </div>
+
+                <h2 class="section-title">🎒 Checklist</h2>
+                ${DATA.checklist.map(item => `
+                    <div class="check-item card ${item.checked ? 'checked' : ''}" onclick="app.toggleCheck(${item.id})">
+                        <div class="check-box">${item.checked ? '✓' : ''}</div>
+                        <span class="check-text">${item.text}</span>
+                    </div>
+                `).join('')}
+
+                <div class="alert-compact card" style="margin-top:12px;">
+                    <strong>Kit Survie :</strong> Sacs poubelle, Sopalin, PQ, Pastilles lave-vaisselle, Doliprane.
+                </div>
+            `;
+            }
+        };
+
+        document.addEventListener('DOMContentLoaded', () => app.init());
+    </script>
+</body>
+
+</html>
