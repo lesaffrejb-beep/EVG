@@ -12,6 +12,7 @@
         href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
         :root {
@@ -1837,16 +1838,26 @@
                 `;
             },
 
-            submitGuestbook(form) {
+            async submitGuestbook(form) {
                 const data = {
                     title: form.title.value,
                     message: form.message.value,
                     author: form.author.value,
-                    date: new Date().toISOString()
                 };
 
-                // SIMULATION -> Ready for Supabase
-                console.log("Guestbook Data:", data);
+                // SUPABASE INSERT
+                if (supabase) {
+                    const { error } = await supabase
+                        .from('guestbook')
+                        .insert([data]);
+
+                    if (error) {
+                        alert("Erreur magic : " + error.message);
+                        return;
+                    }
+                } else {
+                    console.warn("Supabase not defined (script load error?)");
+                }
 
                 alert("✨ Ton message a été scellé dans le Grimoire !");
                 form.reset();
