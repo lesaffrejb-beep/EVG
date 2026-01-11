@@ -1809,7 +1809,42 @@
             // 📜 THE GRIMOIRE (Guestbook)
             // ============================================
             renderGrimoire(el) {
-                el.innerHTML = `<div class="header"><h1 class="header-title">Le Grimoire</h1><p>En maintenance...</p></div>`;
+                el.innerHTML = `
+                    <div class="header">
+                        <h1 class="header-title">Le Grimoire</h1>
+                        <p class="header-sub">Laisse une trace pour l'éternité</p>
+                    </div>
+
+                    <div class="card" style="padding: 24px;">
+                        <p class="handwritten" style="margin-bottom: 20px; text-align: center;">
+                            "Ici, vos mots seront scellés et révélés au Roi Ardur, un par un, chaque semaine après son retour... <br><strong>(À remplir à la fin du séjour !)</strong>"
+                        </p>
+
+                        <form onsubmit="event.preventDefault(); alert('Fonctionnalité en cours de réparation...');" style="display: flex; flex-direction: column; gap: 16px;">
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Titre du Parchemin</label>
+                                <input type="text" name="title" required placeholder="Ex: Souvenir du Gouffre de Helm..." 
+                                    style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Crimson Text', serif;">
+                            </div>
+
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Ton Message</label>
+                                <textarea name="message" required rows="5" placeholder="Écris ton message ici..."
+                                    style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Crimson Text', serif; resize: none;"></textarea>
+                            </div>
+
+                            <div>
+                                <label style="display: block; margin-bottom: 6px; color: var(--gold); font-family: 'Cinzel', serif;">Signé</label>
+                                <input type="text" name="author" required placeholder="Ton Nom (ou ton titre noble)"
+                                    style="width: 100%; padding: 12px; background: rgba(0,0,0,0.2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Crimson Text', serif;">
+                            </div>
+
+                            <button type="submit" class="btn btn-gold" style="justify-content: center; margin-top: 10px;">
+                                🖋️ Sceller le Message
+                            </button>
+                        </form>
+                    </div>
+                `;
             },
 
             async submitGuestbook(form) {
