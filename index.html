@@ -9,7 +9,7 @@
     <meta name="theme-color" content="#0c1a14">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link
-        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap"
+        href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&display=swap"
         rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
@@ -580,25 +580,33 @@
             flex-shrink: 0;
         }
 
-        /* Typography - Handwritten Notes */
+        /* Typography - Readable Serif for Notes (Replacing Handwritten) */
         .handwritten,
         .timeline-desc,
         .logistics-desc,
         .activity-rules li,
-        .quest-meta span {
-            font-family: 'Patrick Hand', cursive;
-            font-size: 16px;
-            /* Slightly larger for readability */
-            letter-spacing: 0.5px;
+        .quest-meta span,
+        .recipe-badge,
+        #weather-widget {
+            font-family: 'Crimson Text', serif;
+            font-weight: 600;
+            font-size: 17px;
+            letter-spacing: 0;
             color: var(--text-secondary);
         }
 
         .timeline-desc {
             font-size: 17px;
-            line-height: 1.4;
+            line-height: 1.5;
             color: #d4cfc3;
-            /* Lighter for contrast */
         }
+
+        /* Specific tweaks for weather to look good with serif */
+        #weather-widget {
+            font-style: italic;
+            color: var(--gold) !important;
+        }
+
 
         /* Timeline (The Map/Journal) - Restyling */
         .timeline-day {
@@ -1756,7 +1764,6 @@
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
-                        <p class="header-sub">Le Sage Dynamo part à l'aventure</p>
                     </div>
 
                     ${current ? `
