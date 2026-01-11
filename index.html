@@ -1711,91 +1711,122 @@
             },
 
             uploadPhoto() {
-                // Fix: Append to body to ensure it works on all devices
+                // Use Native Share Sheet if available
                 const input = document.createElement('input');
                 input.type = 'file';
                 input.accept = 'image/*';
-                input.capture = 'environment'; // Force camera
+                input.capture = 'environment';
                 input.style.display = 'none';
                 document.body.appendChild(input);
 
-                input.onchange = (e) => {
+                input.onchange = async (e) => {
                     const file = e.target.files[0];
                     if (file) {
-                        alert("Photo OK ! Envoi vers le Drive...");
-                        window.open('https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK', '_blank');
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            try {
+                                await navigator.share({
+                                    files: [file],
+                                    title: 'Photo EVG',
+                                    text: 'Photo souvenir pour le Drive !'
+                                });
+                            } catch (err) {
+                                console.log('Share canceled or failed', err);
+                            }
+                        } else {
+                            // Fallback
+                            alert("Partage natif non supporté. Redirection vers le Drive...");
+                            window.open('https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK', '_blank');
+                        }
                     }
                     document.body.removeChild(input);
                 };
 
-                // Trigger click
                 setTimeout(() => input.click(), 0);
             },
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = 'image/*';
+            input.capture = 'environment'; // Force camera
+            input.style.display = 'none';
+            document.body.appendChild(input);
 
-            copyAddress() {
-                navigator.clipboard.writeText(DATA.airbnb.address);
-                const btn = document.getElementById('copy-btn');
-                if (btn) {
-                    btn.classList.add('copied');
-                    btn.innerHTML = '✓ Copié';
-                    confetti({
-                        particleCount: 40,
-                        spread: 50,
-                        origin: { y: 0.8 },
-                        colors: ['#d4a843', '#f0c654', '#fff']
-                    });
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
-                        btn.innerHTML = '📋 Copier';
-                    }, 2000);
+            input.onchange = (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    alert("Photo OK ! Envoi vers le Drive...");
+                    window.open('https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK', '_blank');
                 }
+                document.body.removeChild(input);
+            };
+
+            // Trigger click
+            setTimeout(() => input.click(), 0);
             },
 
-            openRecipe(key) {
-                const recipe = DATA.recipes[key];
-                if (recipe) {
-                    document.getElementById('modal-title').innerHTML = recipe.title;
-                    document.getElementById('modal-content').innerHTML = recipe.content;
-                    document.getElementById('modal').classList.add('open');
-                }
-            },
-
-            closeModal(e) {
-                if (e.target.id === 'modal') {
-                    document.getElementById('modal').classList.remove('open');
-                }
-            },
-
-            navigate(view) {
-                this.currentView = view;
-                document.querySelectorAll('.nav-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.view === view);
+        copyAddress() {
+            navigator.clipboard.writeText(DATA.airbnb.address);
+            const btn = document.getElementById('copy-btn');
+            if (btn) {
+                btn.classList.add('copied');
+                btn.innerHTML = '✓ Copié';
+                confetti({
+                    particleCount: 40,
+                    spread: 50,
+                    origin: { y: 0.8 },
+                    colors: ['#d4a843', '#f0c654', '#fff']
                 });
-                this.render();
-            },
+                setTimeout(() => {
+                    btn.classList.remove('copied');
+                    btn.innerHTML = '📋 Copier';
+                }, 2000);
+            }
+        },
 
-            render() {
-                const el = document.getElementById('app');
-                el.innerHTML = '';
-                el.classList.remove('fade-in');
-                void el.offsetWidth;
-                el.classList.add('fade-in');
+        openRecipe(key) {
+            const recipe = DATA.recipes[key];
+            if (recipe) {
+                document.getElementById('modal-title').innerHTML = recipe.title;
+                document.getElementById('modal-content').innerHTML = recipe.content;
+                document.getElementById('modal').classList.add('open');
+            }
+        },
 
-                switch (this.currentView) {
-                    case 'campfire': this.renderCampfire(el); break;
-                    case 'map': this.renderMap(el); break;
-                    case 'satchel': this.renderSatchel(el); break;
-                }
-            },
+        closeModal(e) {
+            if (e.target.id === 'modal') {
+                document.getElementById('modal').classList.remove('open');
+            }
+        },
 
-            // ============================================
-            // 🔥 THE CAMPFIRE (Home/Live Dashboard)
-            // ============================================
-            renderCampfire(el) {
-                const current = this.getCurrentQuest();
-                const next = this.getNextQuest();
+        navigate(view) {
+            this.currentView = view;
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === view);
+            });
+            this.render();
+        },
 
-                el.innerHTML = `
+        render() {
+            const el = document.getElementById('app');
+            el.innerHTML = '';
+            el.classList.remove('fade-in');
+            void el.offsetWidth;
+            el.classList.add('fade-in');
+
+            switch (this.currentView) {
+                case 'campfire': this.renderCampfire(el); break;
+                case 'map': this.renderMap(el); break;
+                case 'satchel': this.renderSatchel(el); break;
+            }
+        },
+
+        // ============================================
+        // 🔥 THE CAMPFIRE (Home/Live Dashboard)
+        // ============================================
+        renderCampfire(el) {
+            const current = this.getCurrentQuest();
+            const next = this.getNextQuest();
+
+            el.innerHTML = `
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
@@ -1851,34 +1882,34 @@
                         <strong>⚠️ Rappel :</strong> Prépare ton animation 15-20 min + tes photos !
                     </div>
                 `;
-            },
+        },
 
-            // ============================================
-            // 🗺️ THE MAP (Planning/Timeline)
-            // ============================================
-            renderMap(el) {
-                let html = `
+        // ============================================
+        // 🗺️ THE MAP (Planning/Timeline)
+        // ============================================
+        renderMap(el) {
+            let html = `
                     <div class="header">
                         <div class="header-badge">⚔️ 16-18 Janvier 2026</div>
                         <h1 class="header-title">L'Aventure d'Arthur</h1>
                     </div>
                 `;
 
-                DATA.schedule.forEach(day => {
-                    html += `
+            DATA.schedule.forEach(day => {
+                html += `
                         <div class="timeline-day">
                             <div class="timeline-day-header">📜 ${day.day}</div>
                             <div class="timeline-path"></div>
                     `;
 
-                    day.events.forEach(ev => {
-                        // Recipe Badge logic instead of icon overlay
-                        const recipeBtn = ev.recipe ?
-                            `<div class="recipe-badge" onclick="event.stopPropagation(); app.openRecipe('${ev.recipe}')">
+                day.events.forEach(ev => {
+                    // Recipe Badge logic instead of icon overlay
+                    const recipeBtn = ev.recipe ?
+                        `<div class="recipe-badge" onclick="event.stopPropagation(); app.openRecipe('${ev.recipe}')">
                                 🥣 Voir Recette
                              </div>` : '';
 
-                        html += `
+                    html += `
                             <div class="timeline-event card ${ev.highlight ? 'highlight' : ''}">
                                 <div class="timeline-top">
                                     <div class="timeline-title">${ev.icon} ${ev.title}</div>
@@ -1888,26 +1919,26 @@
                                 ${recipeBtn}
                             </div>
                         `;
-                    });
-
-                    html += `</div>`;
                 });
 
-                el.innerHTML = html;
-            },
+                html += `</div>`;
+            });
 
-            // ============================================
-            // 🎒 THE SATCHEL (Guide)
-            // ============================================
-            renderSatchel(el) {
-                const rulesExpanded = this.expandedSections.has('rules');
-                const budgetExpanded = this.expandedSections.has('budget');
-                const checklistExpanded = this.expandedSections.has('checklist');
-                const logisticsExpanded = this.expandedSections.has('logistics');
+            el.innerHTML = html;
+        },
 
-                const checkedCount = DATA.checklist.filter(i => i.checked).length;
+        // ============================================
+        // 🎒 THE SATCHEL (Guide)
+        // ============================================
+        renderSatchel(el) {
+            const rulesExpanded = this.expandedSections.has('rules');
+            const budgetExpanded = this.expandedSections.has('budget');
+            const checklistExpanded = this.expandedSections.has('checklist');
+            const logisticsExpanded = this.expandedSections.has('logistics');
 
-                el.innerHTML = `
+            const checkedCount = DATA.checklist.filter(i => i.checked).length;
+
+            el.innerHTML = `
                     <div class="header">
                         <h1 class="header-title">La Besace</h1>
                         <p class="header-sub">Tout ce qu'il faut savoir</p>
@@ -1930,8 +1961,8 @@
                                     <strong>Enjeu :</strong> Perdants = vaisselle du brunch !
                                 </div>
                                 ${DATA.games.map(g => {
-                    const isExpanded = this.expandedGames.has(g.id);
-                    return `
+                const isExpanded = this.expandedGames.has(g.id);
+                return `
                                         <div class="activity-card card ${isExpanded ? 'expanded' : ''}" data-game="${g.id}" onclick="event.stopPropagation(); app.toggleGame('${g.id}')">
                                             <div class="activity-header">
                                                 <span class="activity-icon">${g.icon}</span>
@@ -1948,7 +1979,7 @@
                                             </div>
                                         </div>
                                     `;
-                }).join('')}
+            }).join('')}
                             </div>
                         </div>
                     </div>
@@ -2051,33 +2082,33 @@
                     </div>
                 `;
 
-                // Render chart if budget is expanded
-                if (budgetExpanded) {
-                    setTimeout(() => {
-                        const ctx = document.getElementById('chart');
-                        if (ctx) {
-                            if (this.chart) this.chart.destroy();
-                            this.chart = new Chart(ctx, {
-                                type: 'doughnut',
-                                data: {
-                                    labels: DATA.budget.items.map(x => x.label),
-                                    datasets: [{
-                                        data: DATA.budget.items.map(x => x.value),
-                                        backgroundColor: DATA.budget.items.map(x => x.color),
-                                        borderWidth: 0
-                                    }]
-                                },
-                                options: {
-                                    responsive: true,
-                                    maintainAspectRatio: false,
-                                    cutout: '70%',
-                                    plugins: { legend: { display: false } }
-                                }
-                            });
-                        }
-                    }, 100);
-                }
+            // Render chart if budget is expanded
+            if (budgetExpanded) {
+                setTimeout(() => {
+                    const ctx = document.getElementById('chart');
+                    if (ctx) {
+                        if (this.chart) this.chart.destroy();
+                        this.chart = new Chart(ctx, {
+                            type: 'doughnut',
+                            data: {
+                                labels: DATA.budget.items.map(x => x.label),
+                                datasets: [{
+                                    data: DATA.budget.items.map(x => x.value),
+                                    backgroundColor: DATA.budget.items.map(x => x.color),
+                                    borderWidth: 0
+                                }]
+                            },
+                            options: {
+                                responsive: true,
+                                maintainAspectRatio: false,
+                                cutout: '70%',
+                                plugins: { legend: { display: false } }
+                            }
+                        });
+                    }
+                }, 100);
             }
+        }
         };
 
         // Initialize App and Embers
