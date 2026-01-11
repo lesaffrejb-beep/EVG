@@ -1042,7 +1042,150 @@
             color: var(--gold);
         }
 
+        /* Photo Upload Components */
+        .upload-zone {
+            background: var(--bg-elevated);
+            border: 2px dashed var(--border-gold);
+            border-radius: var(--radius);
+            padding: 24px 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            margin-bottom: 16px;
+        }
+
+        .upload-zone:hover {
+            border-color: var(--gold);
+            background: var(--gold-dim);
+        }
+
+        .upload-zone:active {
+            transform: scale(0.98);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            margin-bottom: 12px;
+            opacity: 0.7;
+        }
+
+        .upload-text {
+            font-family: 'Cinzel', serif;
+            font-size: var(--text-h4);
+            font-weight: var(--weight-semibold);
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .upload-hint {
+            font-size: var(--text-sm);
+            color: var(--text-muted);
+        }
+
+        .upload-preview {
+            display: none;
+            margin-bottom: 16px;
+            border-radius: var(--radius);
+            overflow: hidden;
+            background: var(--bg-card);
+            border: 1px solid var(--border);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .upload-preview.visible {
+            display: block;
+        }
+
+        .upload-preview img {
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .upload-progress {
+            display: none;
+            margin-bottom: 16px;
+        }
+
+        .upload-progress.visible {
+            display: block;
+        }
+
+        .upload-progress-label {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            font-size: var(--text-sm);
+            color: var(--text-secondary);
+        }
+
+        .upload-progress-bar {
+            height: 8px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 4px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .upload-progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--gold), var(--gold-bright));
+            width: 0%;
+            transition: width 0.3s ease;
+            position: relative;
+            box-shadow: 0 0 10px var(--gold-glow);
+        }
+
+        .upload-progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.3), transparent);
+            animation: shimmer 1.5s infinite;
+        }
+
+        @keyframes shimmer {
+            0% {
+                transform: translateX(-100%);
+            }
+
+            100% {
+                transform: translateX(100%);
+            }
+        }
+
+        .upload-status {
+            padding: 12px 16px;
+            border-radius: var(--radius-sm);
+            font-size: var(--text-base);
+            line-height: var(--leading-normal);
+            text-align: center;
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .upload-status.visible {
+            display: block;
+        }
+
+        .upload-status.success {
+            background: rgba(74, 222, 128, 0.15);
+            color: var(--success);
+            border: 1px solid var(--success);
+        }
+
+        .upload-status.error {
+            background: rgba(239, 68, 68, 0.15);
+            color: #f87171;
+            border: 1px solid #f87171;
+        }
+
         /* Bottom Nav */
+
         .nav {
             position: fixed;
             bottom: 0;
@@ -1788,66 +1931,124 @@
                 }
             },
 
-            uploadPhoto() {
-                // Show a modal with clear instructions
-                const driveUrl = 'https://drive.google.com/drive/folders/15_hvPJKeccpOVXPfFRJy8StFxdN9SVXK';
+            handlePhotoSelect(event) {
+                const file = event.target.files[0];
+                if (!file) return;
 
-                // Check if Web Share API with files is supported
-                const canShareFiles = navigator.canShare && navigator.canShare({ files: [new File([''], 'test.jpg', { type: 'image/jpeg' })] });
+                // Validate file type
+                const allowedTypes = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif', 'image/webp', 'image/heic'];
+                if (!allowedTypes.includes(file.type.toLowerCase())) {
+                    this.showUploadStatus('error', '❌ Type de fichier non autorisé. Utilisez uniquement des images.');
+                    return;
+                }
 
-                if (canShareFiles) {
-                    // Modern approach: capture photo then share
-                    const input = document.createElement('input');
-                    input.type = 'file';
-                    input.accept = 'image/*';
-                    input.capture = 'environment';
-                    input.style.display = 'none';
-                    document.body.appendChild(input);
+                // Validate file size (10MB)
+                if (file.size > 10 * 1024 * 1024) {
+                    this.showUploadStatus('error', '❌ Fichier trop volumineux. Maximum 10MB.');
+                    return;
+                }
 
-                    input.onchange = async (e) => {
-                        const file = e.target.files[0];
-                        if (file) {
-                            try {
-                                await navigator.share({
-                                    files: [file],
-                                    title: 'Photo EVG Arthur',
-                                    text: 'Envoie cette photo sur le Drive !'
-                                });
-                            } catch (err) {
-                                if (err.name !== 'AbortError') {
-                                    window.open(driveUrl, '_blank');
-                                }
-                            }
+                // Show preview
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const previewImg = document.getElementById('photo-preview-img');
+                    const previewContainer = document.getElementById('photo-preview');
+                    if (previewImg && previewContainer) {
+                        previewImg.src = e.target.result;
+                        previewContainer.classList.add('visible');
+                    }
+                };
+                reader.readAsDataURL(file);
+
+                // Upload file
+                this.uploadPhoto(file);
+            },
+
+            async uploadPhoto(file) {
+                const progressContainer = document.getElementById('photo-progress');
+                const progressFill = document.getElementById('photo-progress-fill');
+                const progressPercent = document.getElementById('photo-progress-percent');
+                const statusContainer = document.getElementById('photo-status');
+
+                // Reset status
+                if (statusContainer) {
+                    statusContainer.classList.remove('visible', 'success', 'error');
+                }
+
+                // Show progress
+                if (progressContainer && progressFill && progressPercent) {
+                    progressContainer.classList.add('visible');
+                    progressFill.style.width = '0%';
+                    progressPercent.textContent = '0%';
+                }
+
+                try {
+                    // Create form data
+                    const formData = new FormData();
+                    formData.append('photo', file);
+
+                    // Simulate progress animation
+                    let progress = 0;
+                    const progressInterval = setInterval(() => {
+                        if (progress < 90) {
+                            progress += 10;
+                            if (progressFill) progressFill.style.width = progress + '%';
+                            if (progressPercent) progressPercent.textContent = progress + '%';
                         }
-                        document.body.removeChild(input);
-                    };
+                    }, 200);
 
-                    setTimeout(() => input.click(), 0);
-                } else {
-                    // Fallback: Show modal with instructions
-                    document.getElementById('modal-title').innerHTML = '📷 Ajouter une Photo';
-                    document.getElementById('modal-content').innerHTML = `
-                        <div style="text-align: center;">
-                            <p style="margin-bottom: 20px; font-size: 16px; line-height: 1.6;">
-                                Pour partager tes photos de l'EVG, c'est simple :
-                            </p>
-                            
-                            <div style="background: rgba(0,0,0,0.3); padding: 16px; border-radius: 12px; text-align: left; margin-bottom: 20px;">
-                                <p style="margin-bottom: 12px;"><strong style="color: var(--gold);">1.</strong> Clique sur le bouton ci-dessous</p>
-                                <p style="margin-bottom: 12px;"><strong style="color: var(--gold);">2.</strong> Le Drive Google s'ouvre</p>
-                                <p style="margin-bottom: 0;"><strong style="color: var(--gold);">3.</strong> Appuie sur le <strong>+</strong> puis "Importer"</p>
-                            </div>
-                            
-                            <a href="${driveUrl}" target="_blank" class="btn btn-gold" style="width: 100%; justify-content: center; font-size: 16px; padding: 14px;">
-                                📁 Ouvrir le Drive EVG
-                            </a>
-                            
-                            <p style="margin-top: 16px; font-size: 13px; color: var(--text-muted);">
-                                💡 Sur mobile, tu peux prendre une photo directement depuis le Drive !
-                            </p>
-                        </div>
-                    `;
-                    document.getElementById('modal').classList.add('open');
+                    // Upload to API
+                    const response = await fetch('/api/upload', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    clearInterval(progressInterval);
+
+                    const result = await response.json();
+
+                    if (response.ok && result.success) {
+                        // Complete progress
+                        if (progressFill) progressFill.style.width = '100%';
+                        if (progressPercent) progressPercent.textContent = '100%';
+
+                        // Show success
+                        setTimeout(() => {
+                            if (progressContainer) progressContainer.classList.remove('visible');
+                            this.showUploadStatus('success', '✅ Photo envoyée ! Elle est dans l\'album partagé 🎉');
+
+                            // Confetti celebration
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 },
+                                colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
+                            });
+
+                            // Reset form after 3 seconds
+                            setTimeout(() => {
+                                const previewContainer = document.getElementById('photo-preview');
+                                const fileInput = document.getElementById('photo-input');
+                                if (previewContainer) previewContainer.classList.remove('visible');
+                                if (fileInput) fileInput.value = '';
+                                if (statusContainer) statusContainer.classList.remove('visible');
+                            }, 3000);
+                        }, 500);
+                    } else {
+                        throw new Error(result.error || 'Upload failed');
+                    }
+                } catch (error) {
+                    console.error('Upload error:', error);
+                    if (progressContainer) progressContainer.classList.remove('visible');
+                    this.showUploadStatus('error', '❌ Erreur lors de l\'envoi. Réessaye dans quelques instants.');
+                }
+            },
+
+            showUploadStatus(type, message) {
+                const statusContainer = document.getElementById('photo-status');
+                if (statusContainer) {
+                    statusContainer.className = 'upload-status visible ' + type;
+                    statusContainer.textContent = message;
                 }
             },
 
@@ -2121,6 +2322,7 @@
                 const budgetExpanded = this.expandedSections.has('budget');
                 const checklistExpanded = this.expandedSections.has('checklist');
                 const logisticsExpanded = this.expandedSections.has('logistics');
+                const photosExpanded = this.expandedSections.has('photos');
 
                 const checkedCount = DATA.checklist.filter(i => i.checked).length;
 
@@ -2262,6 +2464,48 @@
                                 <!-- Kit Survie -->
                                 <div class="alert" style="margin-top:8px;">
                                     <strong>🧳 Kit Survie :</strong> Sacs poubelle 100L, Sopalin, PQ, Pastilles lave-vaisselle, Éponges
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Photos -->
+                    <div class="satchel-section card ${this.photosExpanded ? 'expanded' : ''}" data-section="photos">
+                        <div class="satchel-header" onclick="app.toggleSection('photos')">
+                            <div class="satchel-header-left">
+                                <span class="satchel-icon">📸</span>
+                                <span class="satchel-title">Photos</span>
+                            </div>
+                            <span class="satchel-toggle">▶</span>
+                        </div>
+                        <div class="satchel-content">
+                            <div class="satchel-inner">
+                                <input type="file" id="photo-input" accept="image/*" style="display: none;" onchange="app.handlePhotoSelect(event)">
+                                
+                                <div class="upload-zone" onclick="document.getElementById('photo-input').click()">
+                                    <div class="upload-icon">📷</div>
+                                    <div class="upload-text">Partager une photo</div>
+                                    <div class="upload-hint">JPG, PNG, GIF • Max 10MB</div>
+                                </div>
+
+                                <div class="upload-preview" id="photo-preview">
+                                    <img id="photo-preview-img" src="" alt="Aperçu">
+                                </div>
+
+                                <div class="upload-progress" id="photo-progress">
+                                    <div class="upload-progress-label">
+                                        <span>Envoi en cours...</span>
+                                        <span id="photo-progress-percent">0%</span>
+                                    </div>
+                                    <div class="upload-progress-bar">
+                                        <div class="upload-progress-fill" id="photo-progress-fill"></div>
+                                    </div>
+                                </div>
+
+                                <div class="upload-status" id="photo-status"></div>
+
+                                <div class="alert" style="margin-top: 16px;">
+                                    <strong>📖 Album partagé :</strong> Vos photos seront ajoutées à l'album commun de l'aventure !
                                 </div>
                             </div>
                         </div>
