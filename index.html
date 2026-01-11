@@ -14,21 +14,21 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.2/dist/confetti.browser.min.js"></script>
     <style>
         :root {
-            --bg: #000000;
-            --bg-card: #18181b;
-            --bg-elevated: #27272a;
-            --border: rgba(255, 255, 255, 0.1);
-            --border-hover: rgba(255, 255, 255, 0.2);
-            --border-glow: rgba(245, 158, 11, 0.3);
+            --bg: #1c1917;
+            --bg-card: #292524;
+            --bg-elevated: #44403c;
+            --border: rgba(120, 113, 108, 0.2);
+            --border-hover: rgba(168, 162, 158, 0.3);
+            --border-glow: rgba(217, 119, 6, 0.35);
             --glow: #f59e0b;
-            --glow-dim: rgba(245, 158, 11, 0.12);
+            --glow-dim: rgba(217, 119, 6, 0.12);
             --glow-bright: #fbbf24;
-            --glow-neon: #ff9500;
+            --glow-neon: #d97706;
             --text: #fafafa;
-            --text-secondary: #a1a1aa;
-            --text-muted: #71717a;
+            --text-secondary: #a8a29e;
+            --text-muted: #78716c;
             --success: #22c55e;
-            --radius: 16px;
+            --radius: 20px;
             --radius-sm: 12px;
         }
 
@@ -40,15 +40,30 @@
 
         body {
             font-family: 'Inter', -apple-system, sans-serif;
-            background: #000;
+            background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             min-height: 100dvh;
             overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
+            position: relative;
         }
 
-        /* Rich Radial Gradient Background */
+        /* Subtle Noise Texture Overlay */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            opacity: 0.03;
+            z-index: 1;
+            pointer-events: none;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
+        }
+
+        /* Rich Radial Gradient Background - Warm Expedition Depth */
         .bg-glow {
             position: fixed;
             top: -50%;
@@ -56,12 +71,14 @@
             width: 200%;
             height: 200%;
             background:
-                radial-gradient(circle at 20% 10%, rgba(245, 158, 11, 0.15) 0%, transparent 40%),
-                radial-gradient(circle at 80% 90%, rgba(234, 88, 12, 0.12) 0%, transparent 50%),
-                radial-gradient(circle at 50% 50%, rgba(170, 30, 30, 0.08) 0%, transparent 60%);
+                radial-gradient(circle at 20% 10%, rgba(245, 158, 11, 0.16) 0%, transparent 35%),
+                radial-gradient(circle at 80% 90%, rgba(217, 119, 6, 0.14) 0%, transparent 45%),
+                radial-gradient(circle at 50% 50%, rgba(161, 98, 7, 0.10) 0%, transparent 55%),
+                radial-gradient(circle at 15% 80%, rgba(251, 191, 36, 0.08) 0%, transparent 40%),
+                radial-gradient(circle at 85% 20%, rgba(217, 119, 6, 0.06) 0%, transparent 50%);
             animation: bgFloat 30s ease-in-out infinite;
             pointer-events: none;
-            z-index: 0;
+            z-index: 2;
         }
 
         @keyframes bgFloat {
@@ -71,8 +88,12 @@
                 transform: translate(0, 0) scale(1);
             }
 
-            50% {
-                transform: translate(-3%, 3%) scale(1.05);
+            33% {
+                transform: translate(-4%, 4%) scale(1.06) rotate(0.5deg);
+            }
+
+            66% {
+                transform: translate(3%, -3%) scale(1.04) rotate(-0.3deg);
             }
         }
 
@@ -110,22 +131,30 @@
 
         /* Bento Card with Inner Glow */
         .card {
-            background: var(--bg-card);
+            background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
         }
 
-        .card:hover,
-        .card:active {
+        .card:hover {
             border-color: var(--border-hover);
             background: var(--bg-elevated);
             transform: translateY(-1px);
+            box-shadow: 0 0 24px rgba(245, 158, 11, 0.15),
+                inset 0 0 16px rgba(245, 158, 11, 0.08),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .card:active {
+            transform: scale(0.98);
         }
 
         .card-glow:hover {
-            box-shadow: 0 0 32px var(--glow-dim), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 0 32px var(--glow-dim),
+                inset 0 0 20px rgba(245, 158, 11, 0.12),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
             border-color: var(--border-glow);
         }
 
@@ -288,12 +317,12 @@
 
         /* Alert - Compact */
         .alert-compact {
-            padding: 14px 16px;
+            padding: 14px 16px 14px 24px;
             margin: 16px 0;
             border-left: 3px solid var(--glow);
             font-size: 13px;
             color: var(--text-secondary);
-            line-height: 1.5;
+            line-height: 1.6;
         }
 
         .alert-compact strong {
@@ -312,13 +341,17 @@
             border-radius: 8px;
             border: 1px solid var(--border);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         .copy-btn:hover {
             background: var(--glow-dim);
             color: var(--glow);
             border-color: var(--glow);
+        }
+
+        .copy-btn:active {
+            transform: scale(0.95);
         }
 
         .copy-btn.copied {
@@ -332,7 +365,7 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            background: linear-gradient(135deg, var(--glow-neon), #ea580c);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
             color: #000;
             font-size: 13px;
             font-weight: 600;
@@ -340,7 +373,7 @@
             border-radius: 10px;
             border: none;
             cursor: pointer;
-            transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             min-height: 44px;
         }
@@ -361,7 +394,7 @@
 
         .timeline-day-header {
             display: inline-block;
-            background: linear-gradient(135deg, var(--glow), #ea580c);
+            background: linear-gradient(135deg, #f59e0b, #d97706);
             color: #000;
             font-size: 11px;
             font-weight: 700;
@@ -372,8 +405,8 @@
 
         .timeline-event {
             padding: 14px 16px;
-            padding-left: 20px;
-            margin-bottom: 8px;
+            padding-left: 16px;
+            margin-bottom: 12px;
             cursor: pointer;
             position: relative;
             min-height: 44px;
@@ -424,19 +457,19 @@
             font-size: 11px;
             font-family: 'SF Mono', 'Menlo', monospace;
             font-weight: 700;
-            color: var(--glow-neon);
-            background: linear-gradient(135deg, var(--glow-dim), rgba(234, 88, 12, 0.15));
-            padding: 4px 10px;
+            color: #fff;
+            background: #d97706;
+            padding: 6px 12px;
             border-radius: 8px;
             flex-shrink: 0;
-            border: 1px solid var(--border-glow);
-            box-shadow: 0 0 12px rgba(245, 158, 11, 0.2);
+            border: none;
+            box-shadow: 0 2px 8px rgba(217, 119, 6, 0.3);
         }
 
         .timeline-desc {
             font-size: 12px;
             color: var(--text-secondary);
-            line-height: 1.4;
+            line-height: 1.6;
         }
 
         /* Modal / Bottom Sheet */
@@ -638,8 +671,15 @@
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
+        .activity-card:active {
+            transform: scale(0.98);
+        }
+
         .activity-card:hover {
             border-color: var(--border-glow);
+            box-shadow: 0 0 24px rgba(245, 158, 11, 0.15),
+                inset 0 0 16px rgba(245, 158, 11, 0.08),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
         }
 
         .activity-header {
@@ -678,12 +718,14 @@
         .activity-rules {
             max-height: 0;
             overflow: hidden;
-            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.3s ease;
+            transition: max-height 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                opacity 0.3s ease,
+                margin-top 0.3s ease;
             opacity: 0;
         }
 
         .activity-card.expanded .activity-rules {
-            max-height: 400px;
+            max-height: 600px;
             opacity: 1;
             margin-top: 14px;
         }
@@ -695,21 +737,21 @@
         }
 
         .activity-rules li {
-            padding: 8px 12px;
+            padding: 10px 14px 10px 20px;
             margin-bottom: 6px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.4);
             border-radius: 8px;
             font-size: 13px;
-            line-height: 1.6;
-            color: var(--text-secondary);
-            border-left: 2px solid var(--border);
+            line-height: 1.7;
+            color: var(--text);
+            border-left: 3px solid rgba(217, 119, 6, 0.4);
         }
 
         .activity-rules li::before {
             content: '▶';
-            margin-right: 8px;
+            margin-right: 10px;
             color: var(--glow);
-            font-size: 9px;
+            font-size: 10px;
         }
 
         .activity-points {
@@ -808,13 +850,15 @@
             margin: 0 auto;
             display: flex;
             justify-content: space-around;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(24px) saturate(180%);
-            -webkit-backdrop-filter: blur(24px) saturate(180%);
-            border: 1px solid var(--border);
+            background: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(40px) saturate(180%);
+            -webkit-backdrop-filter: blur(40px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.05);
             border-radius: 18px;
             padding: 6px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6),
+                inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+                0 0 40px rgba(245, 158, 11, 0.05);
         }
 
         .nav-btn {
@@ -831,13 +875,17 @@
             font-weight: 500;
             cursor: pointer;
             border-radius: 12px;
-            transition: all 0.2s;
+            transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
             min-height: 44px;
         }
 
         .nav-btn span {
             font-size: 18px;
-            transition: transform 0.2s;
+            transition: transform 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-btn:active {
+            transform: scale(0.95);
         }
 
         .nav-btn.active {
@@ -1040,7 +1088,6 @@
                     ]
                 }
             ],
-            scores: { teamA: {}, teamB: {} }
         };
 
         // Load state
@@ -1061,7 +1108,7 @@
 
             createConfetti() {
                 const container = document.getElementById('confetti-container');
-                const colors = ['#f59e0b', '#fbbf24', '#ea580c', '#fff'];
+                const colors = ['#f59e0b', '#fbbf24', '#d97706', '#fde68a', '#fff'];
                 for (let i = 0; i < 12; i++) {
                     const c = document.createElement('div');
                     c.className = 'confetti';
@@ -1142,7 +1189,7 @@
                             particleCount: 100,
                             spread: 70,
                             origin: { y: 0.6 },
-                            colors: ['#f59e0b', '#fbbf24', '#ea580c']
+                            colors: ['#f59e0b', '#fbbf24', '#d97706', '#fde68a', '#fff']
                         });
                     }
 
@@ -1159,16 +1206,7 @@
                 this.render();
             },
 
-            updateScore(gameId, team, delta) {
-                if (!DATA.scores[team][gameId]) DATA.scores[team][gameId] = 0;
-                DATA.scores[team][gameId] = Math.max(0, DATA.scores[team][gameId] + delta);
-                localStorage.setItem('evg-scores', JSON.stringify(DATA.scores));
-                this.render();
-            },
 
-            getScore(gameId, team) {
-                return DATA.scores[team]?.[gameId] || 0;
-            },
 
             copyAddress() {
                 navigator.clipboard.writeText('1 Clossais, Thouars 79100');
@@ -1182,7 +1220,7 @@
                         particleCount: 50,
                         spread: 50,
                         origin: { y: 0.7 },
-                        colors: ['#f59e0b', '#fbbf24', '#ea580c', '#fff']
+                        colors: ['#f59e0b', '#fbbf24', '#d97706', '#fde68a', '#fff']
                     });
 
                     setTimeout(() => {
