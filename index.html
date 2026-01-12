@@ -2294,24 +2294,44 @@
             },
 
             copyAddress() {
-                navigator.clipboard.writeText(DATA.airbnb.address);
+                console.log('📋 copyAddress called');
                 const btn = document.getElementById('copy-btn');
-                if (btn) {
-                    btn.classList.add('copied');
-                    btn.innerHTML = '✓ Copié';
-                    if (typeof confetti !== 'undefined') {
-                        confetti({
-                            particleCount: 40,
-                            spread: 50,
-                            origin: { y: 0.8 },
-                            colors: ['#d4a843', '#f0c654', '#fff']
-                        });
-                    }
-                    setTimeout(() => {
-                        btn.classList.remove('copied');
-                        btn.innerHTML = '📋 Copier';
-                    }, 2000);
-                }
+
+                navigator.clipboard.writeText(DATA.airbnb.address)
+                    .then(() => {
+                        console.log('✅ Address copied to clipboard');
+                        if (btn) {
+                            btn.classList.add('copied');
+                            btn.innerHTML = '✓ Copié';
+
+                            console.log('🎉 Trying to launch confetti...');
+                            if (typeof confetti !== 'undefined') {
+                                console.log('✅ Confetti library loaded, launching!');
+                                confetti({
+                                    particleCount: 40,
+                                    spread: 50,
+                                    origin: { y: 0.8 },
+                                    colors: ['#d4a843', '#f0c654', '#fff']
+                                });
+                            } else {
+                                console.warn('❌ Confetti library not loaded');
+                            }
+
+                            setTimeout(() => {
+                                btn.classList.remove('copied');
+                                btn.innerHTML = '📋 Copier';
+                            }, 2000);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('❌ Copy failed:', err);
+                        if (btn) {
+                            btn.innerHTML = '❌ Erreur';
+                            setTimeout(() => {
+                                btn.innerHTML = '📋 Copier';
+                            }, 2000);
+                        }
+                    });
             },
 
             openRecipe(key) {
