@@ -1924,12 +1924,14 @@
 
                     // Confetti when all checked
                     if (DATA.checklist.every(i => i.checked)) {
-                        confetti({
-                            particleCount: 100,
-                            spread: 70,
-                            origin: { y: 0.6 },
-                            colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
-                        });
+                        if (typeof confetti !== 'undefined') {
+                            confetti({
+                                particleCount: 100,
+                                spread: 70,
+                                origin: { y: 0.6 },
+                                colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
+                            });
+                        }
                     }
                 }
             },
@@ -2118,12 +2120,14 @@
                             this.showUploadStatus('success', '✅ Photo envoyée ! Elle est dans l\'album partagé 🎉');
 
                             // Confetti celebration
-                            confetti({
-                                particleCount: 100,
-                                spread: 70,
-                                origin: { y: 0.6 },
-                                colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
-                            });
+                            if (typeof confetti !== 'undefined') {
+                                confetti({
+                                    particleCount: 100,
+                                    spread: 70,
+                                    origin: { y: 0.6 },
+                                    colors: ['#d4a843', '#f0c654', '#8b7355', '#fff']
+                                });
+                            }
 
                             // Reset form after 3 seconds
                             setTimeout(() => {
@@ -2279,12 +2283,14 @@
 
                 alert("✨ Ton message a été scellé dans le Grimoire !");
                 form.reset();
-                confetti({
-                    particleCount: 60,
-                    spread: 70,
-                    origin: { y: 0.6 },
-                    colors: ['#d4a843', '#ffffff']
-                });
+                if (typeof confetti !== 'undefined') {
+                    confetti({
+                        particleCount: 60,
+                        spread: 70,
+                        origin: { y: 0.6 },
+                        colors: ['#d4a843', '#ffffff']
+                    });
+                }
             },
 
             copyAddress() {
@@ -2293,12 +2299,14 @@
                 if (btn) {
                     btn.classList.add('copied');
                     btn.innerHTML = '✓ Copié';
-                    confetti({
-                        particleCount: 40,
-                        spread: 50,
-                        origin: { y: 0.8 },
-                        colors: ['#d4a843', '#f0c654', '#fff']
-                    });
+                    if (typeof confetti !== 'undefined') {
+                        confetti({
+                            particleCount: 40,
+                            spread: 50,
+                            origin: { y: 0.8 },
+                            colors: ['#d4a843', '#f0c654', '#fff']
+                        });
+                    }
                     setTimeout(() => {
                         btn.classList.remove('copied');
                         btn.innerHTML = '📋 Copier';
